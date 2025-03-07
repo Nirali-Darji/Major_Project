@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.0.4",
     "@tailwindcss/vite": "^4.0.11",
     "mobx": "^6.13.6",
