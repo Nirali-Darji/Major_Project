@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Portfolio from "./components/Portfolio";
+import LeftDesignBar from "./components/LeftDesignBar";
+import RightDesignBar from "./components/RightDesignBar";
+import DesignModel from "./components/DesignModel";
 
 function App() {
   return (
@@ -15,13 +18,16 @@ function App() {
         <LeftDesignBar /> */}
         {/* <Register />
         <Login /> */}
-        <Router>
+        {/* <LeftDesignBar/> */}
+        {/* <RightDesignBar /> */}
+        <DesignModel/>
+        {/* <Router>
           <Routes>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Portfolio />} />
           </Routes>
-        </Router>
+        </Router> */}
       </div>
     </>
   );
