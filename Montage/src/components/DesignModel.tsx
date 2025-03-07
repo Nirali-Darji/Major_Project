@@ -1,7 +1,7 @@
 import React from 'react'
-import DesignNavbar from './DesignNavbar'
+import DesignNavbar from './DesignNavBar'
 import LeftDesignBar from './LeftDesignBar'
-import RightDesignBar from './RightDesignBar'
+import RightDesignBar from './DesignRightBar'
 
 function DesignModel() {
   return (

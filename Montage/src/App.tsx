@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Portfolio from "./components/Portfolio";
-import LeftDesignBar from "./components/LeftDesignBar";
-import RightDesignBar from "./components/RightDesignBar";
+// import LeftDesignBar from "./components/LeftDesignBar";
+// import RightDesignBar from "./components/DesignRightBar";
 import DesignModel from "./components/DesignModel";
 
 function App() {
@@ -20,14 +20,15 @@ function App() {
         <Login /> */}
         {/* <LeftDesignBar/> */}
         {/* <RightDesignBar /> */}
-        <DesignModel/>
-        {/* <Router>
+        {/* <DesignModel/> */}
+        <Router>
           <Routes>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Portfolio />} />
+            <Route path="/designmodel" element={<DesignModel />} />
           </Routes>
-        </Router> */}
+        </Router>
       </div>
     </>
   );

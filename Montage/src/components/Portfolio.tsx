@@ -1,6 +1,6 @@
 import React from 'react'
-import Leftbar from "./Leftbar";
-import Navbar from "./Navbar";
+import Leftbar from "./PortfolioLeftBar";
+import Navbar from "./PortfolioNavBar";
 import Toolbar from "./Toolbar";
 
 function Portfolio() {
