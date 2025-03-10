@@ -1,6 +1,5 @@
 import React from "react";
 import { FaRegFolder, FaSearch } from "react-icons/fa";
-// import { FaSearch } from "react-icons/fa";
 
 function Leftbar() {
   return (
@@ -11,7 +10,6 @@ function Leftbar() {
       </div>
       <div className="flex items-center border rounded-lg p-2 bg-[#fff] border border-[#E0E0E0] mx-2">
         <FaSearch className="mr-2 " size={15} />
-        {/* <span className="text-gray-500">Find a portfolio or design</span> */}
         <input
           type="text"
           placeholder="Find a portfolio or design"

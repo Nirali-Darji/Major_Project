@@ -42,7 +42,7 @@ const data ={
       "selectedAccent": "Chalk"
     }
 
-const TinyHomeSelector = () => {
+const DesignRightBar = () => {
 //   const [data, setData] = useState(null);
 
 //   useEffect(() => {
@@ -55,7 +55,7 @@ const TinyHomeSelector = () => {
 //   if (!data) return <div>Loading...</div>;
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 z-10">
+    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
       <div className="text-center">
         <h2 className="text-xl font-bold">
           {data.bed} Bed {data.bath} Bath {data.sqft} sqft
@@ -103,4 +103,4 @@ const TinyHomeSelector = () => {
   );
 };
 
-export default TinyHomeSelector;
+export default DesignRightBar;

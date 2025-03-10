@@ -3,13 +3,15 @@ import { FaPlus } from "react-icons/fa";
 import { LuLayoutGrid } from "react-icons/lu";
 import { FaList } from "react-icons/fa6";
 import { FaCaretRight } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 function Toolbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="flex justify-between w-full p-2">
       <div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-sm shadow hover:bg-gray-800 transition">
+        <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-sm shadow hover:bg-gray-800 transition" onClick={() => navigate("/design")}>
           <FaPlus />
           <span className="text-base font-medium">New Design</span>
         </button>
