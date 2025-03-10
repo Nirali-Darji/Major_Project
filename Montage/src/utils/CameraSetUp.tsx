@@ -9,7 +9,7 @@ const CameraSetUp = observer(() => {
     const aspect = viewport.width / viewport.height
     
     // Orthographic camera parameters
-    const orthoZoom = 30
+    const orthoZoom = 10
     const orthoNear = 0.1
     const orthoFar = 1000
   
@@ -27,8 +27,8 @@ const CameraSetUp = observer(() => {
         ) : (
           <OrthographicCamera
             makeDefault
-            position={[0, 10, 0]}
-            zoom={3}
+            position={[0, 5, 0]}
+            zoom={1}
             near={orthoNear}
             far={orthoFar}
             left={-aspect * orthoZoom}

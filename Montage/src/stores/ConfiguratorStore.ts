@@ -1,13 +1,21 @@
-import { computed, makeAutoObservable } from "mobx";
+import { computed, makeAutoObservable, action } from "mobx";
 
 class ConfiguratorStore {
   models: Array<{ id: string; url: string; position: [number, number, number] }> = [];
-  selectedModelIds: Set<string> = new Set();
+  selectedModelId: string | null = null; // Changed from Set to single string
   viewMode: '2D' | '3D' = '2D';
+  
+  // Dragging state
+  isDragging: boolean = false;
+  dragStartPosition: [number, number, number] | null = null;
+  dragOffset: [number, number, number] = [0, 0, 0];
 
   constructor() {
     makeAutoObservable(this, {
-      selectedModels: computed,
+      selectedModel: computed,
+      startDragging: action,
+      continueDragging: action,
+      endDragging: action
     });
   }
 
@@ -29,12 +37,13 @@ class ConfiguratorStore {
     });
     this.selectModel(id);
   }
+
   addModels(urls: string[]) {
-    const newIds: string[] = [];
+    let lastId = '';
 
     urls.forEach((url, index) => {
       const id = Math.random().toString(36).substr(2, 9);
-      newIds.push(id);
+      lastId = id;
       const position: [number, number, number] = [
         (this.models.length + index) * 2, // Space models along the X-axis
         0,
@@ -47,11 +56,11 @@ class ConfiguratorStore {
       });
     });
 
-    // Clear previous selection and select all new models
-    this.selectedModelIds.clear();
-    newIds.forEach((id) => this.selectedModelIds.add(id));
+    // Select the last added model
+    if (lastId) {
+      this.selectModel(lastId);
+    }
   }
-  
 
   updateModelPosition(id: string, position: [number, number, number]) {
     const model = this.models.find((m) => m.id === id);
@@ -61,36 +70,96 @@ class ConfiguratorStore {
   }
 
   selectModel(id: string | null) {
-    if (id === null) {
-      this.selectedModelIds.clear();
-      return;
-    }
-
-    // Toggle selection (multi-select is always enabled)
-    if (this.selectedModelIds.has(id)) {
-      this.selectedModelIds.delete(id);
-    } else {
-      this.selectedModelIds.add(id);
+    // Simply set the selectedModelId to the new id or null
+    this.selectedModelId = id;
+    
+    // If we're currently dragging and selection changes, end the drag
+    if (this.isDragging) {
+      this.endDragging();
     }
   }
 
   isSelected(id: string) {
-    return this.selectedModelIds.has(id);
+    return this.selectedModelId === id;
   }
 
   removeModel(id: string) {
     this.models = this.models.filter((m) => m.id !== id);
-    this.selectedModelIds.delete(id);
+    
+    // If we're removing the selected model, clear the selection
+    if (this.selectedModelId === id) {
+      this.selectedModelId = null;
+    }
   }
 
-  removeSelectedModels() {
-    this.models = this.models.filter((m) => !this.selectedModelIds.has(m.id));
-    this.selectedModelIds.clear();
+  removeSelectedModel() {
+    if (this.selectedModelId) {
+      this.models = this.models.filter((m) => m.id !== this.selectedModelId);
+      this.selectedModelId = null;
+    }
   }
 
-  // Get array of selected model objects
-  get selectedModels() {
-    return this.models.filter((m) => this.selectedModelIds.has(m.id));
+  // Get the selected model object
+  get selectedModel() {
+    return this.selectedModelId 
+      ? this.models.find(m => m.id === this.selectedModelId) || null 
+      : null;
+  }
+  
+  // Dragging operations
+  
+  // Start dragging the selected model
+  startDragging(modelId: string, clickPoint: [number, number, number]) {
+    // Only allow dragging the selected model
+    if (this.selectedModelId !== modelId) {
+      this.selectModel(modelId);
+      return false; // Don't start dragging yet, just select
+    }
+    
+    this.isDragging = true;
+    
+    // Find the model that was clicked
+    const model = this.models.find(m => m.id === modelId);
+    if (!model) return false;
+    
+    // Store the starting position
+    this.dragStartPosition = [...model.position] as [number, number, number];
+    
+    // Calculate drag offset (difference between click point and model position)
+    this.dragOffset = [
+      clickPoint[0] - model.position[0],
+      clickPoint[1] - model.position[1],
+      clickPoint[2] - model.position[2]
+    ];
+    
+    return true; // Successfully started dragging
+  }
+  
+  // Continue dragging with updated mouse position
+  continueDragging(newPoint: [number, number, number]) {
+    if (!this.isDragging || !this.selectedModelId || !this.dragStartPosition) return;
+    
+    // Calculate the new position for the dragged model
+    const newPosition: [number, number, number] = [
+      newPoint[0] - this.dragOffset[0],
+      newPoint[1] - this.dragOffset[1],
+      newPoint[2] - this.dragOffset[2]
+    ];
+    
+    // Update the model position
+    this.updateModelPosition(this.selectedModelId, newPosition);
+  }
+  
+  // End the dragging operation
+  endDragging() {
+    this.isDragging = false;
+    this.dragStartPosition = null;
+    this.dragOffset = [0, 0, 0];
+  }
+  
+  // Check if the model is being dragged
+  isBeingDragged(id: string) {
+    return this.isDragging && this.selectedModelId === id;
   }
 }
 

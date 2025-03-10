@@ -23,9 +23,9 @@ const MultiSelectionControls = observer(() => {
           onObjectChange={() => {
             if (group.current) {
               // Get the transformation delta
-              const deltaX = group.current.position.x;
+              const deltaX = group.current.position.x + 2;
               const deltaY = group.current.position.y;
-              const deltaZ = group.current.position.z;
+              const deltaZ = group.current.position.z + 2;
   
               // Reset group position for next movement
               group.current.position.set(0, 0, 0);
