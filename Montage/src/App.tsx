@@ -77,6 +77,15 @@ const ScreenshotButton = () => {
     }
   };
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Portfolio from "./components/Portfolio";
+// import LeftDesignBar from "./components/LeftDesignBar";
+// import RightDesignBar from "./components/DesignRightBar";
+import DesignModel from "./components/DesignModel";
+
+function App() {
   return (
     <button
       className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -132,6 +141,27 @@ const App = observer(() => {
           </ul>
         </div>
         <ScreenshotButton />
+    <>
+      <div>
+        {/* <Navbar />
+        <div className="flex">
+          <Leftbar />
+          <div className="w-full"><Toolbar /></div>
+        </div>
+        <LeftDesignBar /> */}
+        {/* <Register />
+        <Login /> */}
+        {/* <LeftDesignBar/> */}
+        {/* <RightDesignBar /> */}
+        {/* <DesignModel/> */}
+        <Router>
+          <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Portfolio />} />
+            <Route path="/designmodel" element={<DesignModel />} />
+          </Routes>
+        </Router>
       </div>
 
       {/* Canvas Container */}
@@ -144,4 +174,4 @@ const App = observer(() => {
   );
 });
 
-export default App
+export default App;
