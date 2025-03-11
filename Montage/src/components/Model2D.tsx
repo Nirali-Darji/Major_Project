@@ -17,34 +17,30 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
   const dragPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0)), []);
   const intersection = useMemo(() => new THREE.Vector3(), []);
 
-  // Merge all geometries into one
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
 
     if (gltf && gltf.scene) {
+      
       gltf.scene.traverse((child: any) => {
+        
         if (child.isMesh) {
-          // Skip meshes that should be hidden
+          store.addModelToGroup(id, child);
           if (child.name.includes("Roof")) {
             return; // Skip this mesh
           }
           
-          // Clone the geometry and apply the mesh's transformation
           const geometry = child.geometry.clone();
           geometry.applyMatrix4(child.matrixWorld);
 
-          // Ensure all geometries have a "uv" attribute
           if (!geometry.attributes.uv) {
-            // Add a dummy "uv" attribute if it doesn't exist
             const uvs = new Float32Array(geometry.attributes.position.count * 2);
             geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
           }
 
-          // Create vertex colors for this geometry
           const colors = new Float32Array(geometry.attributes.position.count * 3);
           const color = new THREE.Color();
 
-          // Set vertex colors based on the child's name
           if (child.name.includes("Node")) {
             color.set("cyan"); // Cyan for Node
           } else if(child.name.includes("Floor")){
@@ -53,7 +49,6 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             color.set(new THREE.Color("#ffffff")); // Default white
           }
 
-          // Apply the color to all vertices of this geometry
           for (let i = 0; i < colors.length; i += 3) {
             colors[i] = color.r;
             colors[i + 1] = color.g;
@@ -85,8 +80,7 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
   const material = useMemo(() => new THREE.MeshBasicMaterial({ 
     vertexColors: true,
     transparent: true,
-    opacity: isDragging ? 0.7 : 1 
-  }), [isDragging]);
+  }), []);
   
   // Get intersection point with the drag plane
   const getIntersectionPoint = (e) => {
@@ -108,9 +102,9 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
 
   const onPointerDown = (e) => {
     e.stopPropagation();
+    store.selectModel(id);
     if(!isDragging){
       store.selectModel(id);
-      console.log(store.selectedModelId)
     }
     const clickPoint = getIntersectionPoint(e);
     
@@ -169,24 +163,37 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
   // Clean up bounding box elements
   const cleanupBoundingBox = () => {
     if (boundingBoxInfo && groupRef.current) {
-      boundingBoxInfo.circles.forEach(circle => {
-        groupRef.current.remove(circle);
-        circle.geometry.dispose();
-        circle.material.dispose();
-      });
+      // Clean up circles if they exist
+      if (boundingBoxInfo.circles) {
+        boundingBoxInfo.circles.forEach(circle => {
+          groupRef.current.remove(circle);
+          circle.geometry.dispose();
+          circle.material.dispose();
+        });
+      }
       
-      boundingBoxInfo.lines.forEach(line => {
-        groupRef.current.remove(line);
-        line.geometry.dispose();
-        line.material.dispose();
-      });
+      // Clean up lines if they exist
+      if (boundingBoxInfo.lines) {
+        boundingBoxInfo.lines.forEach(line => {
+          groupRef.current.remove(line);
+          line.geometry.dispose();
+          line.material.dispose();
+        });
+      }
     }
   };
 
-  // Calculate and update 2D bounding box with circle corners
+  // Calculate and update 2D bounding box with circle corners for selection or lines for hover
   useEffect(() => {
     cleanupBoundingBox();
-    if ((!isSelected && !isHovered) || !groupRef.current || !mergedGeometry) {
+    
+    if (!groupRef.current || !mergedGeometry) {
+      setBoundingBoxInfo(null);
+      return;
+    }
+
+    // If neither selected nor hovered, do nothing
+    if (!isSelected && !isHovered) {
       setBoundingBoxInfo(null);
       return;
     }
@@ -199,31 +206,17 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
     min.sub(new THREE.Vector3(position[0], position[1], position[2]));
     max.sub(new THREE.Vector3(position[0], position[1], position[2]));
     
-    const yPos = 0.01;
+    const yPos = 6;
     
     const corners = [
       new THREE.Vector3(min.x, yPos, min.z), // bottom-left
       new THREE.Vector3(max.x, yPos, min.z), // bottom-right
-      new THREE.Vector3(max.x, yPos, max.z), 
-      new THREE.Vector3(min.x, yPos, max.z), 
+      new THREE.Vector3(max.x, yPos, max.z), // top-right
+      new THREE.Vector3(min.x, yPos, max.z), // top-left
     ];
     
-    const circleColor = 0x6666ff; 
-    const circleMaterial = new THREE.MeshBasicMaterial({ color: circleColor });
-    const circleRadius = 0.15;
-    const circleSegments = 16;
-    const circleGeometry = new THREE.CircleGeometry(circleRadius, circleSegments);
-    
-    const circles = corners.map(position => {
-      const circle = new THREE.Mesh(circleGeometry, circleMaterial);
-      circle.position.copy(position);
-      circle.rotation.x = -Math.PI / 2;
-      groupRef.current.add(circle);
-      return circle;
-    });
-    
-    // Create lines connecting the corners
-    const lineMaterial = new THREE.LineBasicMaterial({ color: circleColor });
+    const circleColor = "#c59d1d";
+    const lineMaterial = new THREE.LineBasicMaterial({ color: circleColor, linewidth: 5 });
     const lines = [];
     
     // Create 4 lines for the rectangle
@@ -238,7 +231,23 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
       lines.push(line);
     }
     
-    // Save references to clean up later
+    // Only add corner circles if the model is selected (not on hover or by default)
+    const circles: THREE.Mesh[] = [];
+    if (isSelected) {
+      const circleMaterial = new THREE.MeshBasicMaterial({ color: circleColor });
+      const circleRadius = 0.15;
+      const circleSegments = 16;
+      const circleGeometry = new THREE.CircleGeometry(circleRadius, circleSegments);
+      
+      corners.forEach(position => {
+        const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+        circle.position.copy(position);
+        circle.rotation.x = -Math.PI / 2;
+        groupRef.current.add(circle);
+        circles.push(circle);
+      });
+    }
+    
     setBoundingBoxInfo({
       boundingBox,
       min,
@@ -247,9 +256,9 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
       lines
     });
     
-  }, [isSelected, isHovered, mergedGeometry, position]);
+  }, [store.selectedModelId,isSelected, isHovered, mergedGeometry, position]);
 
-  // Cleanup when component unmounts
+  // Clean up on unmount
   useEffect(() => {
     return () => {
       cleanupBoundingBox();
@@ -260,20 +269,20 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
     <group
       ref={groupRef}
       position={position}
+      onClick={(e) => {
+        e.stopPropagation();
+        store.selectModel(id);
+      }}
       onPointerDown={onPointerDown}
       onPointerOver={() => setIsHovered(true)} // Set hover state to true
       onPointerOut={() => setIsHovered(false)} // Set hover state to false
     >
-      {/* Render the merged geometry with edges */}
       {mergedGeometry && (
         <mesh geometry={mergedGeometry} material={material}>
-          {/* Show edges only when selected or hovered */}
-        
             <Edges
               threshold={10} // Angle threshold for edge detection
-              color={isSelected ? 0x6666ff : 0x000000} 
+              color={ 0x000000} 
             />
-        
         </mesh>
       )}
 

@@ -1,7 +1,8 @@
 import { computed, makeAutoObservable, action } from "mobx";
+import * as THREE from 'three';
 
 class ConfiguratorStore {
-  models: Array<{ id: string; url: string; position: [number, number, number] }> = [];
+  models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh> }> = [];
   selectedModelId: string | null = null; // Changed from Set to single string
   viewMode: '2D' | '3D' = '2D';
   
@@ -23,42 +24,38 @@ class ConfiguratorStore {
     this.viewMode = mode;
   }
 
-  addModel(url: string) {
+  addModel(url: string, position: [number, number, number], gltfId?: string) {
     const id = Math.random().toString(36).substr(2, 9);
-    const position: [number, number, number] = [
-      this.models.length * 2, // Space models along the X-axis
-      0,
-      0,
-    ];
+    const rotation: [number, number, number] = [0, 0, 0];
     this.models.push({
       id,
       url,
       position,
+      rotation,
+      group: [],
+      gltfId
     });
-    this.selectModel(id);
+    // this.selectModel(id);
   }
 
-  addModels(urls: string[]) {
-    let lastId = '';
+  addModelToGroup(id: string, mesh: THREE.Mesh) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.group.push(mesh);
+    }
+  }
 
-    urls.forEach((url, index) => {
-      const id = Math.random().toString(36).substr(2, 9);
-      lastId = id;
-      const position: [number, number, number] = [
-        (this.models.length + index) * 2, // Space models along the X-axis
-        0,
-        0,
-      ];
-      this.models.push({
-        id,
-        url,
-        position,
-      });
-    });
+ updateTexture(id: string, texture: THREE.Texture) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.texture = texture;
+    }
+  }
 
-    // Select the last added model
-    if (lastId) {
-      this.selectModel(lastId);
+  updateModelRotation(id: string, rotation: [number, number, number]) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.rotation = rotation;
     }
   }
 
@@ -70,10 +67,8 @@ class ConfiguratorStore {
   }
 
   selectModel(id: string | null) {
-    // Simply set the selectedModelId to the new id or null
     this.selectedModelId = id;
     
-    // If we're currently dragging and selection changes, end the drag
     if (this.isDragging) {
       this.endDragging();
     }
@@ -86,7 +81,6 @@ class ConfiguratorStore {
   removeModel(id: string) {
     this.models = this.models.filter((m) => m.id !== id);
     
-    // If we're removing the selected model, clear the selection
     if (this.selectedModelId === id) {
       this.selectedModelId = null;
     }
@@ -99,7 +93,6 @@ class ConfiguratorStore {
     }
   }
 
-  // Get the selected model object
   get selectedModel() {
     return this.selectedModelId 
       ? this.models.find(m => m.id === this.selectedModelId) || null 
