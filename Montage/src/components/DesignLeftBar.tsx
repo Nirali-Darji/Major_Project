@@ -2,6 +2,10 @@ import { LuLayoutGrid } from "react-icons/lu";
 import { useState } from "react";
 import { TbRectangleVertical } from "react-icons/tb";
 import { FaPlus } from "react-icons/fa";
+import ApiFetcher from "../utils/ApiFetcher";
+import store from "../stores/ConfiguratorStore";
+import { observer } from "mobx-react-lite";
+import { toJS } from "mobx";
 import {
   FaRegBookmark,
   FaCubes,
@@ -85,7 +89,20 @@ export default function DesignLeftBar() {
   );
 }
 
-function DesignContent({ handleClick }) {
+const DesignContent = observer(({ handleClick }) =>{
+  const { data, loading, error } = ApiFetcher({
+    endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
+  });
+  const models = store.models;
+  console.log(toJS(models))
+  console.log(data)
+  const dataArray = Array.isArray(data) ? data : [data];
+  console.log(dataArray)
+  const filteredDesigns = models
+  .map((model) => dataArray?.find((item) => item?.glbFile === model.url))
+  .filter(Boolean); 
+  console.log(filteredDesigns)
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between border-b-1 border-[#DCDCDC]">
@@ -100,7 +117,14 @@ function DesignContent({ handleClick }) {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <DesignCard />
+        {/* <DesignCard type={'design'} /> */}
+        {filteredDesigns.map((design, index) => (
+          <DesignCard
+            design={design}
+            type="design"
+            index={index+1}
+          />
+        ))}
         <div className="max-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:border-2 border-black flex items-center justify-center h-64">
           <button
             className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
@@ -114,9 +138,27 @@ function DesignContent({ handleClick }) {
       </div>
     </div>
   );
-}
+});
 
 function ModulesContent() {
+  const { data, loading, error } = ApiFetcher({
+    endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
+  });
+
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const filteredModules = data
+    ?.filter((module) =>
+      selectedType ? module.moduleType.name === selectedType : true
+    )
+    .filter((module) =>
+      module.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  console.log(loading);
+  console.log(error);
+  console.log(data);
+  if (loading) return <div>Loading modules...</div>;
+  if (error) return <div>Error: {error}</div>;
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC]">
@@ -128,21 +170,34 @@ function ModulesContent() {
           type="text"
           placeholder="Find a portfolio or design"
           className="outline-none text-gray-500 w-full"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="flex gap-4 border-y-1 border-[#DCDCDC] py-2">
-        <button className="bg-white text-black px-2 py-1 rounded-lg border border-gray-300 hover:bg-gray-200 transition">
-          Annex
-        </button>
-        <button className="bg-white text-black px-2 py-1 rounded-lg border border-gray-300 hover:bg-gray-200 transition">
-          Dwelling
-        </button>
-        <button className="bg-white text-black px-2 py-1 rounded-lg border border-gray-300 hover:bg-gray-200 transition">
-          Lifestyle
-        </button>
+
+      <div className="flex gap-4  m-auto border-y-1 border-[#DCDCDC] py-2">
+        {["Annex", "Dwelling", "Lifestyle"].map((type) => (
+          <button
+            key={type}
+            className={`px-2 py-1 rounded-lg border border-gray-300 transition ${
+              selectedType === type
+                ? "bg-gray-200 "
+                : "bg-white text-black hover:bg-gray-200"
+            }`}
+            onClick={() => setSelectedType(type)}
+          >
+            {type}
+          </button>
+        ))}
       </div>
-      <div className="flex flex-col gap-2">
-        <DesignCard />
+      <div className="flex flex-wrap gap-4 gap-2 max-h-screen overflow-y-auto">
+        {filteredModules && filteredModules.length > 0 ? (
+          filteredModules.map((module) => (
+            <DesignCard design={module} key={module.id} type={'module'}/>
+          ))
+        ) : (
+          <div>No modules found</div>
+        )}
       </div>
     </div>
   );
@@ -160,3 +215,7 @@ function SavedContent() {
     </div>
   );
 }
+
+"https://montage-data-dev.s3.us-west-1.amazonaws.com/modules/141/module.glb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2LIPZZCHVOP3DN5P%2F20250311%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250311T062418Z&X-Amz-Expires=86400&X-Amz-Signature=19cd50c132a495ed4aedc6d7cbd920c6a0b3dcab3736afa84237b01d20fb855d&X-Amz-SignedHeaders=host&x-id=GetObject"
+
+"https://montage-data-dev.s3.us-west-1.amazonaws.com/modules/141/module.glb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2LIPZZCHVOP3DN5P%2F20250311%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250311T062429Z&X-Amz-Expires=86400&X-Amz-Signature=2ccbd78d7854e7b5dab64cc18ec9ea1dbd8a9d3c3a82ad874aa6909b45dbe4a1&X-Amz-SignedHeaders=host&x-id=GetObject"

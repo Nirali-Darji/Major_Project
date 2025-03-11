@@ -47,7 +47,7 @@ import DesignNavBar from "./DesignNavBar";
 import DesignLeftBar from "./DesignLeftBar";
 import DesignRightBar from "./DesignRightBar";
 import DisplayOption from "./DisplayOption";
-// import CanvasSetup from "./CanvasSetup";
+import CanvasSetup from "./CanvasSetup";
 
 function DesignModel() {
   const [showRightBar, setShowRightBar] = useState(true);
@@ -55,11 +55,16 @@ function DesignModel() {
   return (
     <div className="h-screen w-screen">
       {/* Background 3D Canvas */}
-      <Canvas className="fixed top-0 left-0 w-full h-full z-0">
+      {/* <Canvas className="fixed top-0 left-0 w-full h-full z-0">
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
-      </Canvas>
+      </Canvas> */}
       {/* <CanvasSetup/> */}
+      <div className="flex-1 fixed top-0 left-0 w-full h-full z-0">
+          <Canvas>
+            <CanvasSetup />
+          </Canvas>
+        </div>
 
       {/* UI Components */}
       <div className="relative z-10 ">

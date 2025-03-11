@@ -4,7 +4,7 @@ import * as THREE from 'three';
 class ConfiguratorStore {
   models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh> }> = [];
   selectedModelId: string | null = null; // Changed from Set to single string
-  viewMode: '2D' | '3D' = '2D';
+  viewMode: '2D' | '3D'| 'images' = '2D';
   
   // Dragging state
   isDragging: boolean = false;
@@ -20,7 +20,7 @@ class ConfiguratorStore {
     });
   }
 
-  setViewMode(mode: '2D' | '3D') {
+  setViewMode(mode: '2D' | '3D' | 'images') {
     this.viewMode = mode;
   }
 

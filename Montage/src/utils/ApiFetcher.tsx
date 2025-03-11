@@ -34,17 +34,23 @@ const ApiFetcher = <T,>({
           headers: {
             "Content-Type": "application/json",
             ...headers,
+            ...(import.meta.env.VITE_AUTH_TOKEN ? { Authorization: `Bearer ${import.meta.env.VITE_AUTH_TOKEN}` } : {}),
           },
           body: body && method !== "GET" ? JSON.stringify(body) : null,
         };
 
+        console.log("Fetching:", method, endpoint);
+        // console.log("Authorization Token:", headers.Authorization);
+
         const response = await fetch(endpoint, options);
+        console.log(response);
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
 
         const result: T = await response.json();
+        // console.log('Result :',result);
         setData(result);
       } catch (err) {
         setError((err as Error).message);
@@ -54,7 +60,7 @@ const ApiFetcher = <T,>({
     };
 
     fetchData();
-  }, [endpoint, method, body, headers]);
+  }, [endpoint, method]);
 
   return { data, loading, error };
 };
