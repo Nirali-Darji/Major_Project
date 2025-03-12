@@ -7,7 +7,6 @@ import * as THREE from 'three';
 import useDragInteractions from "../hooks/useDragInteraction.js";
 import useMergeGeometry from "../hooks/useMergeGeometry.js";
 import useRotationInteraction from "../hooks/useRotationInteraction.js";
-import DesignTool from './DesignTools'
 
 const Model2D = observer(({ id, gltf }: { id: string, gltf: any }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -199,34 +198,26 @@ useEffect(() => {
       onPointerOver={() => setIsHovered(true)} 
       onPointerOut={() => setIsHovered(false)} 
     >
-      {mergedGeometry && (
-        <mesh geometry={mergedGeometry} material={material}>
-            <Edges
-              threshold={10} // Angle threshold for edge detection
-              color={ 0x000000} 
-            />
-        </mesh>
-      )}
-
-      {/* Model label */}
-      {isSelected && (
-        // <Html>
-        //   <div style={{
-        //     position: 'absolute',
-        //     top: '-20px',
-        //     backgroundColor: 'rgba(0,0,0,0.7)',
-        //     color: 'white',
-        //     padding: '2px 5px',
-        //     borderRadius: '3px',
-        //     fontSize: '10px',
-        //     userSelect: 'none',
-        //   }}>
-        //     {id.substring(0, 4)}
-        //     {isDragging ? ' (dragging)' : ''}
-        //   </div>
-        // </Html>
-        <DesignTool/>
-      )}
+      {mergedGeometry && <mesh geometry={mergedGeometry} material={material}>
+        <Edges threshold={15} color={0x000000} lineWidth={1} />
+      </mesh>}
+      
+      {isSelected && <Html>
+        <div style={{
+          position: 'absolute',
+          top: '-20px',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          color: 'white',
+          padding: '2px 5px',
+          borderRadius: '3px',
+          fontSize: '10px',
+          userSelect: 'none',
+        }}>
+          {id.substring(0, 4)}
+          {isDragging ? ' (dragging)' : ''}
+          {isRotating ? ' (rotating)' : ''}
+        </div>
+      </Html>}
     </group>
   );
 });
