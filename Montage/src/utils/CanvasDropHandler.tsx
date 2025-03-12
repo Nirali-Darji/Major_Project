@@ -3,6 +3,7 @@ import store from "../stores/ConfiguratorStore";
 import { useEffect, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from 'three';
+import getInterSection from "./getInterSection";
 
 const CanvasDropHandler = observer(() => {
   const { camera, gl } = useThree();
@@ -22,40 +23,21 @@ const CanvasDropHandler = observer(() => {
   const mouse = useMemo(() => new THREE.Vector2(), []);
 
   useEffect(() => {
+    if(store.viewMode === '2D'){
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
 
     const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-
-      if (e.clientX !== undefined) {
-        const rect = gl.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        
-        
-        raycaster.setFromCamera(mouse, camera);
-        
-     
-        const didIntersect = raycaster.ray.intersectPlane(dragPlane, intersection);
-        
-        if (didIntersect) {
-          
-          const position: [number, number, number] = [
-            intersection.x,
-            intersection.y,
-            intersection.z
-          ];
+      e.preventDefault();    
+          const position: [number, number, number] = getInterSection(dragPlane, intersection, raycaster, camera, mouse, gl, e);
           
           const url = e.dataTransfer?.getData('text/plain');
-          console.log(url)
           if (url) {
               store.addModel(url, position);
           }
         } 
-      }
-    };
+      
 
     const canvas = gl.domElement;
     canvas.addEventListener('dragover', handleDragOver);
@@ -65,7 +47,7 @@ const CanvasDropHandler = observer(() => {
     return () => {
       canvas.removeEventListener('dragover', handleDragOver);
       canvas.removeEventListener('drop', handleDrop);
-    };
+    };}
   }, [gl, camera, raycaster, dragPlane, intersection, mouse]);
 
   return null;

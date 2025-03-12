@@ -6,16 +6,6 @@ import * as THREE from 'three';
 const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, position: [number, number, number] }) => {
   const ref = useRef<THREE.Group>(null);
 
-  // Debug position
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.position.set(...position);
-    }
-  }, [position]);
-
- 
-
-  // Add highlight effect for selected models
   useEffect(() => {
     if (gltf && gltf.scene) {
       gltf.scene.traverse((child: any) => {
@@ -24,7 +14,6 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             child.material.transparent = true;
             child.material.opacity = 0;
             child.visible = false;
-            console.log(child)
           }
 
           if(child.name.includes("Node")){
@@ -32,21 +21,21 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             child.material.color.set("cyan");
             child.material.opacity = 0.7;
           }
-          
+         child.raycast =() =>{} 
         }
       });
     }
+
+
 
   }, [gltf]);
 
   return (
     <group
       ref={ref}
-      onClick={(e) => {
-        e.stopPropagation();
-        store.selectModel(id);
-      }}
-      scale={[1, 1, 1]} // Adjust scale as needed
+      position={position}
+      rotation-y={store.getModelRotation(id)}
+      scale={[1, 1, 1]} 
     >
       
       <primitive object={gltf.scene.clone()} />
