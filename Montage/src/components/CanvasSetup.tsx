@@ -5,12 +5,9 @@ import CameraSetUp from "../utils/CameraSetUp";
 import CanvasDropHandler from "../utils/CanvasDropHandler";
 import Model from "./Model";
 import { observer } from "mobx-react-lite";
-// import MultiSelectionControls from "../utils/MultiSelectionControls";
-import * as THREE from "three";
 
 const CanvasSetup = observer(() => {
-  const { scene } = useThree();
-  scene.background = new THREE.Color(0xffffff);
+
   return (
     <>
       <CanvasDropHandler />
@@ -19,13 +16,7 @@ const CanvasSetup = observer(() => {
       <directionalLight position={[10, 10, 5]} intensity={1} />
       <directionalLight position={[-10, -10, -5]} intensity={1} />
       <directionalLight position={[10, 10, -5]} intensity={1} />
-      {/* <pointLight position={[0, 10, 0]} intensity={1} /> */}
-      {/* <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshBasicMaterial color={new THREE.Color(0xffffff)} />
-      </mesh> */}
 
-      {/* Use restricted controls for 2D view */}
       {store.viewMode === "2D" ? (
         <OrbitControls
           makeDefault
@@ -37,7 +28,6 @@ const CanvasSetup = observer(() => {
         <OrbitControls makeDefault />
       )}
 
-      {/* Grid helper for 2D view */}
       {store.viewMode === "2D" && (
         <gridHelper
           args={[100, 100, 0xf0f0f0, 0xf0f0f0]}
@@ -45,7 +35,6 @@ const CanvasSetup = observer(() => {
         />
       )}
 
-      {/* Load all models */}
       {store.models.map((model) => (
         <Model
           key={model.id}
@@ -55,8 +44,6 @@ const CanvasSetup = observer(() => {
         />
       ))}
 
-      {/* Add transform controls for multi-selection */}
-      {/* <MultiSelectionControls /> */}
     </>
   );
 });

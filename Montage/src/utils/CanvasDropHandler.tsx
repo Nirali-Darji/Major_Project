@@ -3,6 +3,7 @@ import store from "../stores/ConfiguratorStore";
 import { useEffect, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from 'three';
+import getInterSection from "./getInterSection";
 
 const CanvasDropHandler = observer(() => {
   const { camera, gl } = useThree();
@@ -22,6 +23,7 @@ const CanvasDropHandler = observer(() => {
   const mouse = useMemo(() => new THREE.Vector2(), []);
 
   useEffect(() => {
+    if(store.viewMode === '2D'){
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
@@ -73,7 +75,7 @@ const CanvasDropHandler = observer(() => {
     return () => {
       canvas.removeEventListener('dragover', handleDragOver);
       canvas.removeEventListener('drop', handleDrop);
-    };
+    };}
   }, [gl, camera, raycaster, dragPlane, intersection, mouse]);
 
   return null;

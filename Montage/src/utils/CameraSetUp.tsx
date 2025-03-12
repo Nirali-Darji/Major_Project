@@ -23,7 +23,7 @@ const CameraSetUp = observer(() => {
           <PerspectiveCamera  makeDefault
           fov={perspectiveFov}
           near={perspectiveNear}
-          far={perspectiveFar} position={[0, 0, 5]} />
+          far={perspectiveFar} position={[0, 25, 0]} />
         ) : (
           <OrthographicCamera
             makeDefault

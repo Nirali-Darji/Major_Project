@@ -50,9 +50,22 @@ setShowDetails(value:boolean){
       group: [],
       gltfId
     });
-    // this.selectModel(id);
   }
 
+  getModelRotation(id:string) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      return model.rotation[1];
+    }
+    return 0;
+  }
+
+  geModelPosition(id:string){
+ const model = this.models.find((m) => m.id === id);
+ if(model){
+  return model.position;
+ }
+  }
   addModelToGroup(id: string, mesh: THREE.Mesh) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
@@ -60,43 +73,17 @@ setShowDetails(value:boolean){
     }
   }
 
-//  updateTexture(id: string, texture: THREE.Texture) {
-//     const model = this.models.find((m) => m.id === id);
-//     if (model) {
-//       model.texture = texture;
-//     }
-//   }
-updateExternalTexture(id: string, texture: THREE.Texture) {
-  const model = this.models.find((m) => m.id === id);
-  if (model) {
-    model.group.forEach((mesh) => {
-      if(mesh.name.includes('External')){
-      mesh.material.map = texture;}
-    });
-  }
-}
-
-
-updateInternalTexture(id: string, texture: THREE.Texture) {
-  const model = this.models.find((m) => m.id === id);
-  if (model) {
-    model.group.forEach((mesh) => {
-      if(!mesh.name.includes('Internal')){
-      mesh.material.map = texture;}
-    });
-  }
-}
-
-
-
-
-  updateModelRotation(id: string, rotation: [number, number, number]) {
-    if(this.baseModel === id){
-      return;
-    }
+ updateTexture(id: string, texture: THREE.Texture) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
-      model.rotation = rotation;
+      model.texture = texture;
+    }
+  }
+
+  updateModelRotation(id: string, rotation: [number, number, number]) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.rotation[1] = yRotation;
     }
   }
 
@@ -111,6 +98,7 @@ updateInternalTexture(id: string, texture: THREE.Texture) {
   }
 
   selectModel(id: string | null) {
+    if(this.selectedModelId === id) return;
     this.selectedModelId = id;
     
     if (this.isDragging) {
@@ -143,26 +131,20 @@ updateInternalTexture(id: string, texture: THREE.Texture) {
       : null;
   }
   
-  // Dragging operations
   
-  // Start dragging the selected model
   startDragging(modelId: string, clickPoint: [number, number, number]) {
-    // Only allow dragging the selected model
     if (this.selectedModelId !== modelId) {
       this.selectModel(modelId);
-      return false; // Don't start dragging yet, just select
+      return false; 
     }
     
     this.isDragging = true;
     
-    // Find the model that was clicked
     const model = this.models.find(m => m.id === modelId);
     if (!model) return false;
     
-    // Store the starting position
     this.dragStartPosition = [...model.position] as [number, number, number];
     
-    // Calculate drag offset (difference between click point and model position)
     this.dragOffset = [
       clickPoint[0] - model.position[0],
       clickPoint[1] - model.position[1],
@@ -172,29 +154,24 @@ updateInternalTexture(id: string, texture: THREE.Texture) {
     return true; // Successfully started dragging
   }
   
-  // Continue dragging with updated mouse position
   continueDragging(newPoint: [number, number, number]) {
     if (!this.isDragging || !this.selectedModelId || !this.dragStartPosition) return;
     
-    // Calculate the new position for the dragged model
     const newPosition: [number, number, number] = [
       newPoint[0] - this.dragOffset[0],
       newPoint[1] - this.dragOffset[1],
       newPoint[2] - this.dragOffset[2]
     ];
     
-    // Update the model position
     this.updateModelPosition(this.selectedModelId, newPosition);
   }
   
-  // End the dragging operation
   endDragging() {
     this.isDragging = false;
     this.dragStartPosition = null;
     this.dragOffset = [0, 0, 0];
   }
   
-  // Check if the model is being dragged
   isBeingDragged(id: string) {
     return this.isDragging && this.selectedModelId === id;
   }
