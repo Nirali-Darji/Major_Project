@@ -7,15 +7,7 @@ import * as THREE from 'three';
 const CanvasDropHandler = observer(() => {
   const { camera, gl } = useThree();
   
-<<<<<<< Updated upstream
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-=======
-    useEffect(() => {
-
-      const handleDragOver = (e: DragEvent) => {
-        e.preventDefault(); // Prevent default behavior
-      };
->>>>>>> Stashed changes
   
   const dragPlane = useMemo(() => {
     const plane = new THREE.Plane();
@@ -26,37 +18,8 @@ const CanvasDropHandler = observer(() => {
     return plane;
   }, []);
   
-<<<<<<< Updated upstream
   const intersection = useMemo(() => new THREE.Vector3(), []);
   const mouse = useMemo(() => new THREE.Vector2(), []);
-=======
-        const payload = e.dataTransfer?.getData("application/json");
-        if (payload) {
-          try {
-            const { url, gltfId } = JSON.parse(payload);
-            if (url && gltfId) {
-              store.addModel(url); // Pass both URL and ID to the store
-              console.log("Dropped model:", { url, gltfId });
-            }
-          } catch (error) {
-            console.error("Failed to parse drop data:", error);
-          }
-        }
-      };
-  
-      const canvas = gl.domElement; // Get the canvas element
-      canvas.addEventListener('dragover', handleDragOver);
-      canvas.addEventListener('drop', handleDrop);
-  
-      return () => {
-        canvas.removeEventListener('dragover', handleDragOver);
-        canvas.removeEventListener('drop', handleDrop);
-      };
-    }, [gl]);
-  
-    return null; // This component doesn't render anything
-  });
->>>>>>> Stashed changes
 
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
@@ -85,14 +48,22 @@ const CanvasDropHandler = observer(() => {
             intersection.z
           ];
           
-          const url = e.dataTransfer?.getData('text/plain');
-          console.log(url)
-          if (url) {
-              store.addModel(url, position);
+          const payload = e.dataTransfer?.getData("application/json");
+          if (payload) {
+            try {
+              const { url, gltfId } = JSON.parse(payload);
+              if (url && gltfId) {
+                store.addModel(url,position, gltfId); // Pass both URL and ID to the store
+                console.log("Dropped model:", { url, gltfId });
+              }
+            } catch (error) {
+              console.error("Failed to parse drop data:", error);
+            }
           }
+        };
         } 
       }
-    };
+    
 
     const canvas = gl.domElement;
     canvas.addEventListener('dragover', handleDragOver);

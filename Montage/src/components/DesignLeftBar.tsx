@@ -35,7 +35,7 @@ export default function DesignLeftBar() {
   return (
     <div className="flex h-screen bg-gray-100 z-10">
       {/* Sidebar */}
-      <div className="w-25 bg-white border-r-1 border-[#DCDCDC] shadow-lg flex flex-col gap-2 items-center py-6">
+      <div className="w-25 bg-gray-100 border-r-1 border-[#DCDCDC] shadow-lg flex flex-col gap-2 items-center py-6">
         <button
           className={`p-2 w-20 flex flex-col items-center hover:bg-gray-200 rounded-lg ${
             activeTab === "design" && "border-2 border-blue-500"
@@ -65,7 +65,7 @@ export default function DesignLeftBar() {
         </button>
         <div
           className={`fixed bottom-4 z-10 ${
-            isContentVisible ? "left-100" : "left-30"
+            isContentVisible ? "left-110" : "left-30"
           }`}
         >
           <button
@@ -83,7 +83,7 @@ export default function DesignLeftBar() {
 
       {/* Content Area */}
       {isContentVisible && (
-        <div className="flex-1 p-2 w-70">{renderContent()}</div>
+        <div className="flex-1 p-2 w-80">{renderContent()}</div>
       )}
     </div>
   );
@@ -99,7 +99,7 @@ const DesignContent = observer(({ handleClick }) =>{
   const dataArray = Array.isArray(data) ? data : [data];
   console.log(dataArray)
   const filteredDesigns = models
-  .map((model) => dataArray?.find((item) => item?.glbFile === model.url))
+  .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
   .filter(Boolean); 
   console.log(filteredDesigns)
 
@@ -116,7 +116,7 @@ const DesignContent = observer(({ handleClick }) =>{
           </div>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-4 max-h-[] overflow-y-auto ">
         {/* <DesignCard type={'design'} /> */}
         {filteredDesigns.map((design, index) => (
           <DesignCard
@@ -125,7 +125,7 @@ const DesignContent = observer(({ handleClick }) =>{
             index={index+1}
           />
         ))}
-        <div className="max-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:border-2 border-black flex items-center justify-center h-64">
+        <div className="w-full bg-white rounded-2xl shadow-lg group hover:border-2 border-black flex items-center justify-center h-64">
           <button
             className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
             onClick={() => {
@@ -145,7 +145,7 @@ function ModulesContent() {
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
 
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<string | null>('Annex');
   const [searchTerm, setSearchTerm] = useState<string>("");
   const filteredModules = data
     ?.filter((module) =>
@@ -190,7 +190,7 @@ function ModulesContent() {
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap gap-4 gap-2 max-h-screen overflow-y-auto">
+      <div className="flex flex-wrap gap-4 max-h-screen overflow-y-auto">
         {filteredModules && filteredModules.length > 0 ? (
           filteredModules.map((module) => (
             <DesignCard design={module} key={module.id} type={'module'}/>
@@ -215,7 +215,3 @@ function SavedContent() {
     </div>
   );
 }
-
-"https://montage-data-dev.s3.us-west-1.amazonaws.com/modules/141/module.glb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2LIPZZCHVOP3DN5P%2F20250311%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250311T062418Z&X-Amz-Expires=86400&X-Amz-Signature=19cd50c132a495ed4aedc6d7cbd920c6a0b3dcab3736afa84237b01d20fb855d&X-Amz-SignedHeaders=host&x-id=GetObject"
-
-"https://montage-data-dev.s3.us-west-1.amazonaws.com/modules/141/module.glb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA2LIPZZCHVOP3DN5P%2F20250311%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20250311T062429Z&X-Amz-Expires=86400&X-Amz-Signature=2ccbd78d7854e7b5dab64cc18ec9ea1dbd8a9d3c3a82ad874aa6909b45dbe4a1&X-Amz-SignedHeaders=host&x-id=GetObject"

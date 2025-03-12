@@ -6,6 +6,7 @@ import Register from "./components/Register";
 import Portfolio from "./components/Portfolio";
 import DesignModel from "./components/DesignModel";
 import DesignCard from './components/DesignCard';
+import SelectedModelDetails from './components/SelectedModelDetails';
 
 
 const App = observer(() => {
@@ -17,7 +18,7 @@ const App = observer(() => {
         <Route path="/register" element={<Register />} />
         {/* <Route path="/" element={<Portfolio />} /> */}
         <Route path="/design" element={<DesignModel />} />
-        <Route path="/card" element={<DesignCard />} />
+        <Route path="/details" element={<SelectedModelDetails  />} />
         </Routes>
     </Router>
   );

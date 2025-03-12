@@ -1,106 +1,124 @@
-// import React from 'react'
-// // makw the navbar  right sidebar
-
-// function RightDesignBar() {
-//   return (
-//     <div>
-//       <div>
-//         <div>
-//             <span></span><span></span>
-//         </div>
-//         <div><span></span><span></span></div>
-//         <div><span></span><span></span></div>
-//       </div>
-
-//       <div></div>
-
-
-//     </div>
-//   )
-// }
-// export default RightDesignBar
-
-
-// import { useState, useEffect } from 'react';
-
-const data ={
-      "bed": 0,
-      "bath": 0.5,
-      "sqft": 256,
-      "exteriorFinish": [
-        { "name": "Renne Accoya", "textureUrl": "/textures/renne-accoya.jpg", "selected": true },
-        { "name": "Cedar", "textureUrl": "/textures/cedar.jpg", "selected": false },
-        { "name": "Steel", "textureUrl": "/textures/steel.jpg", "selected": false },
-        { "name": "Charcoal", "textureUrl": "/textures/charcoal.jpg", "selected": false }
-      ],
-      "selectedFinish": "Renne Accoya",
-      "exteriorAccent": [
-        { "color": "#FFFFFF", "selected": true },
-        { "color": "#F0F0F0", "selected": false },
-        { "color": "#000000", "selected": false }
-      ],
-      "selectedAccent": "Chalk"
-    }
+import { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import ApiFetcher from "../utils/ApiFetcher";
+import store from "../stores/ConfiguratorStore";
+import { reaction } from "mobx";
 
 const TinyHomeSelector = () => {
-//   const [data, setData] = useState(null);
+  const { data, loading, error } = ApiFetcher({
+    endpoint: `${import.meta.env.VITE_API_BASE_URL}/styles/`,
+  });
 
-//   useEffect(() => {
-//     // Simulate API call
-//     fetch('/api/tiny-home') 
-//       .then((res) => res.json())
-//       .then((data) => setData(data));
-//   }, []);
+  const { data: moduleData, loading: moduleLoading, error: moduleError } = ApiFetcher({
+    endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
+  });
 
-//   if (!data) return <div>Loading...</div>;
+  const [selectedMaterials, setSelectedMaterials] = useState({});
+  const [totals, setTotals] = useState({
+    totalBedRooms: 0,
+    totalBathrooms: 0,
+    totalSize: 0,
+  });
+
+  useEffect(() => {
+    const dispose = reaction(
+      () => store.models.slice(), // Track models
+      (models) => {
+        console.log("Models changed, recalculating totals");
+        if (moduleData && models.length > 0) {
+          const updatedTotals = totalUtility(moduleData, models);
+          setTotals(updatedTotals);
+        }
+      }
+    );
+  
+    return () => dispose(); // Clean up reaction
+  }, [moduleData]);
+
+  if (loading || moduleLoading) return <div>Loading...</div>;
+  if (error || moduleError) return <div>Error loading data!</div>;
+
+  const handleMaterialSelect = (substyleIndex, material) => {
+    setSelectedMaterials((prev) => ({
+      ...prev,
+      [substyleIndex]: material,
+    }));
+  };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 z-10">
+    <div className="p-6 w-90 mx-auto bg-white shadow-md space-y-4 max-h-screen overflow-y-auto z-10">
       <div className="text-center">
-        <h2 className="text-xl font-bold">
-          {data.bed} Bed {data.bath} Bath {data.sqft} sqft
+        <h2 className="text-lg font-bold">
+          {totals.totalBedRooms} Bedrooms {totals.totalBathrooms} Bathroom {totals.totalSize} sqft
         </h2>
       </div>
-      <div className="flex justify-center">
-        <div className="w-32 h-32 bg-gray-100"></div> {/* Placeholder for image */}
-      </div>
-      <div>
-        <h3 className="font-semibold">Exterior Finish</h3>
-        <div className="flex space-x-2 mt-2">
-          {data.exteriorFinish.map((finish, index) => (
-            <div
-              key={index}
-              className={`w-12 h-12 rounded cursor-pointer border-2 ${
-                finish.selected ? 'border-blue-500' : 'border-transparent'
-              }`}
-            >
-              <img
-                src={finish.textureUrl}
-                alt={finish.name}
-                className="w-full h-full rounded object-cover"
-              />
+      <div className="">
+        {data?.subStyleList?.length > 0 ? (
+          data.subStyleList.map((substyle, index) => (
+            <div key={index} className="border-b pb-4 mb-4">
+              <div className="flex justify-center">
+                <div className="w-full h-60 bg-gray-100">
+                  <img
+                    src={selectedMaterials[index]?.imageURL || substyle.imageURL}
+                    alt={substyle.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <h3 className="font-semibold text-2xl mt-2 text-center">
+                {substyle.name}
+              </h3>
+              <div className="flex justify-center mt-2">
+                {substyle.materialList.map((material, matIndex) => (
+                  <div
+                    key={matIndex}
+                    className={`w-15 h-15 flex justify-center items-center cursor-pointer border-2 ${
+                      selectedMaterials[index]?.name === material.name ? "border-blue-500" : "border-transparent"
+                    }`}
+                    onClick={() => handleMaterialSelect(index, material)}
+                  >
+                    <img
+                      src={material.imageURL}
+                      alt={material.name}
+                      className="w-[80%] h-[80%] object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              {selectedMaterials[index] && (
+                <p className="mt-2 text-center text-blue-600">{selectedMaterials[index].name}</p>
+              )}
             </div>
-          ))}
-        </div>
-        <p className="mt-2">{data.selectedFinish} Included</p>
-      </div>
-      <div>
-        <h3 className="font-semibold">Exterior Accent</h3>
-        <div className="flex space-x-2 mt-2">
-          {data.exteriorAccent.map((accent, index) => (
-            <div
-              key={index}
-              className={`w-12 h-12 rounded cursor-pointer border-2 ${
-                accent.selected ? 'border-blue-500' : 'border-transparent'
-              }`}
-              style={{ backgroundColor: accent.color }}
-            ></div>
-          ))}
-        </div>
-        <p className="mt-2">{data.selectedAccent} Included</p>
+          ))
+        ) : (
+          <div>No styles available</div>
+        )}
       </div>
     </div>
   );
 };
 
-export default TinyHomeSelector;
+export default observer(TinyHomeSelector);
+
+const totalUtility = (moduleData, models) => {
+  const dataArray = Array.isArray(moduleData) ? moduleData : [moduleData];
+  const filteredDesigns = models
+    .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+    .filter(Boolean);
+
+  let totalBedRooms = 0;
+  let totalBathrooms = 0;
+  let totalSize = 0;
+
+  for (let i = 0; i < filteredDesigns.length; i++) {
+    totalBedRooms += filteredDesigns[i]?.noOfBedrooms || 0;
+    totalBathrooms += filteredDesigns[i]?.noOfBathrooms || 0;
+    totalSize += filteredDesigns[i]?.size || 0;
+  }
+
+  return {
+    totalBedRooms,
+    totalBathrooms,
+    totalSize,
+  };
+};

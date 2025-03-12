@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import * as THREE from 'three';
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
+import DesignTool from './DesignTools'
 
 const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, position: [number, number, number] }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -288,21 +289,22 @@ const Model2D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
 
       {/* Model label */}
       {isSelected && (
-        <Html>
-          <div style={{
-            position: 'absolute',
-            top: '-20px',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            padding: '2px 5px',
-            borderRadius: '3px',
-            fontSize: '10px',
-            userSelect: 'none',
-          }}>
-            {id.substring(0, 4)}
-            {isDragging ? ' (dragging)' : ''}
-          </div>
-        </Html>
+        // <Html>
+        //   <div style={{
+        //     position: 'absolute',
+        //     top: '-20px',
+        //     backgroundColor: 'rgba(0,0,0,0.7)',
+        //     color: 'white',
+        //     padding: '2px 5px',
+        //     borderRadius: '3px',
+        //     fontSize: '10px',
+        //     userSelect: 'none',
+        //   }}>
+        //     {id.substring(0, 4)}
+        //     {isDragging ? ' (dragging)' : ''}
+        //   </div>
+        // </Html>
+        <DesignTool/>
       )}
     </group>
   );

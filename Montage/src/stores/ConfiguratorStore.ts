@@ -5,11 +5,14 @@ class ConfiguratorStore {
   models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh> }> = [];
   selectedModelId: string | null = null; // Changed from Set to single string
   viewMode: '2D' | '3D'| 'images' = '2D';
+  baseModel:string=""
+  showDetails:boolean = false;
   
   // Dragging state
   isDragging: boolean = false;
   dragStartPosition: [number, number, number] | null = null;
   dragOffset: [number, number, number] = [0, 0, 0];
+
 
   constructor() {
     makeAutoObservable(this, {
@@ -20,12 +23,24 @@ class ConfiguratorStore {
     });
   }
 
+setBaseModel(id:string){
+  this.baseModel = id;
+}
+
+setShowDetails(value:boolean){
+  this.showDetails =value
+}
+
   setViewMode(mode: '2D' | '3D' | 'images') {
     this.viewMode = mode;
   }
 
   addModel(url: string, position: [number, number, number], gltfId?: string) {
     const id = Math.random().toString(36).substr(2, 9);
+    if(this.models.length === 0){
+      this.baseModel = id;
+    }
+
     const rotation: [number, number, number] = [0, 0, 0];
     this.models.push({
       id,
@@ -45,14 +60,40 @@ class ConfiguratorStore {
     }
   }
 
- updateTexture(id: string, texture: THREE.Texture) {
-    const model = this.models.find((m) => m.id === id);
-    if (model) {
-      model.texture = texture;
-    }
+//  updateTexture(id: string, texture: THREE.Texture) {
+//     const model = this.models.find((m) => m.id === id);
+//     if (model) {
+//       model.texture = texture;
+//     }
+//   }
+updateExternalTexture(id: string, texture: THREE.Texture) {
+  const model = this.models.find((m) => m.id === id);
+  if (model) {
+    model.group.forEach((mesh) => {
+      if(mesh.name.includes('External')){
+      mesh.material.map = texture;}
+    });
   }
+}
+
+
+updateInternalTexture(id: string, texture: THREE.Texture) {
+  const model = this.models.find((m) => m.id === id);
+  if (model) {
+    model.group.forEach((mesh) => {
+      if(!mesh.name.includes('Internal')){
+      mesh.material.map = texture;}
+    });
+  }
+}
+
+
+
 
   updateModelRotation(id: string, rotation: [number, number, number]) {
+    if(this.baseModel === id){
+      return;
+    }
     const model = this.models.find((m) => m.id === id);
     if (model) {
       model.rotation = rotation;
@@ -60,6 +101,9 @@ class ConfiguratorStore {
   }
 
   updateModelPosition(id: string, position: [number, number, number]) {
+    if(this.baseModel === id){
+      return;
+    }
     const model = this.models.find((m) => m.id === id);
     if (model) {
       model.position = position;
