@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import useDragInteractions from "../hooks/useDragInteraction.js";
 import useMergeGeometry from "../hooks/useMergeGeometry.js";
 import useRotationInteraction from "../hooks/useRotationInteraction.js";
+import DesignTools from "./DesignTools.js";
 
 const Model2D = observer(({ id, gltf }: { id: string, gltf: any }) => {
   const groupRef = useRef<THREE.Group>(null);
