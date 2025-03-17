@@ -7,6 +7,7 @@ import * as THREE from "three";
 import useDragInteractions from "../hooks/useDragInteraction.js";
 import useMergeGeometry from "../hooks/useMergeGeometry.js";
 import useRotationInteraction from "../hooks/useRotationInteraction.js";
+import DesignTools from "./DesignTools.js";
 
 const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -246,72 +247,11 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       onPointerOut={() => setIsHovered(false)}
       scale={scale}
     >
-      {mergedGeometry && (
-        <mesh geometry={mergedGeometry} material={material}>
-          <Edges threshold={15} color={0x000000} lineWidth={1} />
-        </mesh>
-      )}
-
-      {isSelected && (
-        <Html>
-          <div
-            style={{
-              position: "absolute",
-              top: "-60px",
-              left: "-60px",
-              backgroundColor: "rgba(0,0,0,0.7)",
-              color: "white",
-              padding: "5px 10px",
-              borderRadius: "3px",
-              fontSize: "10px",
-              userSelect: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: "5px"
-            }}
-          >
-            <div>
-              {id.substring(0, 4)}
-              {isDragging ? " (dragging)" : ""}
-              {isRotating ? " (rotating)" : ""}
-            </div>
-            <div style={{ display: "flex", gap: "5px" }}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  mirrorHorizontally();
-                }}
-                style={{
-                  cursor: "pointer",
-                  border: "none",
-                  color: "white",
-                  padding: "3px 5px",
-                  borderRadius: "2px",
-                  fontSize: "10px"
-                }}
-              >
-                Mirror H
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  mirrorVertically();
-                }}
-                style={{
-                  cursor: "pointer",
-                  border: "none",
-                  color: "white",
-                  padding: "3px 5px",
-                  borderRadius: "2px",
-                  fontSize: "10px"
-                }}
-              >
-                Mirror V
-              </button>
-            </div>
-          </div>
-        </Html>
-      )}
+      {mergedGeometry && <mesh geometry={mergedGeometry} material={material}>
+        <Edges threshold={15} color={0x000000} lineWidth={1} />
+      </mesh>}
+      
+      {isSelected && <DesignTools/>}
     </group>
   );
 });
