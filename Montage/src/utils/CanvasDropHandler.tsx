@@ -23,7 +23,7 @@ const CanvasDropHandler = observer(() => {
   const mouse = useMemo(() => new THREE.Vector2(), []);
 
   useEffect(() => {
-    if(store.viewMode === '2D'){
+  
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
@@ -75,7 +75,7 @@ const CanvasDropHandler = observer(() => {
     return () => {
       canvas.removeEventListener('dragover', handleDragOver);
       canvas.removeEventListener('drop', handleDrop);
-    };}
+    }
   }, [gl, camera, raycaster, dragPlane, intersection, mouse]);
 
   return null;
