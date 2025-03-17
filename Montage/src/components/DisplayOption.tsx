@@ -16,7 +16,7 @@ function DisplayOption() {
 
   return (
     <div>
-      <div className="flex gap-2 items-center bg-gray-100 p-2 fixed top-30 right-90 rounded-lg z-10">
+      <div className="flex gap-2 items-center bg-gray-100 p-2 fixed top-30 right-95 rounded-lg z-10">
         {buttons.map((btn) => (
           <button
             key={btn.id}

@@ -82,31 +82,39 @@ export default function DesignLeftBar() {
       </div>
 
       {/* Content Area */}
-      {isContentVisible && (
+      {/* {isContentVisible && (
         <div className="flex-1 p-2 w-80">{renderContent()}</div>
-      )}
+      )} */}
+
+      <div
+        className={`transition-all duration-300 ${
+          isContentVisible ? "w-80" : "w-0 overflow-hidden"
+        }`}
+      >
+        {renderContent()}
+      </div>
     </div>
   );
 }
 
-const DesignContent = observer(({ handleClick }) =>{
+const DesignContent = observer(({ handleClick }) => {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
   const models = store.models;
-  console.log(toJS(models))
-  console.log(data)
+  console.log(toJS(models));
+  console.log(data);
   const dataArray = Array.isArray(data) ? data : [data];
-  console.log(dataArray)
+  console.log(dataArray);
   const filteredDesigns = models
-  .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
-  .filter(Boolean); 
-  console.log(filteredDesigns)
+    .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+    .filter(Boolean);
+  console.log(filteredDesigns);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between border-b-1 border-[#DCDCDC]">
-        <h3 className="text-lg font-semibold">Design</h3>
+        <h3 className="text-lg font-semibold mx-2">Design</h3>
         <div className="flex">
           <div className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition">
             <LuLayoutGrid className="text-lg font-semibold" />
@@ -119,13 +127,9 @@ const DesignContent = observer(({ handleClick }) =>{
       <div className="flex flex-wrap gap-4 max-h-[] overflow-y-auto ">
         {/* <DesignCard type={'design'} /> */}
         {filteredDesigns.map((design, index) => (
-          <DesignCard
-            design={design}
-            type="design"
-            index={index+1}
-          />
+          <DesignCard design={design} type="design" index={index + 1} />
         ))}
-        <div className="w-full bg-white rounded-2xl shadow-lg group hover:border-2 border-black flex items-center justify-center h-64">
+        <div className="w-full bg-white rounded-2xl shadow-lg group mx-2 hover:border-2 border-black flex items-center justify-center h-64">
           <button
             className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
             onClick={() => {
@@ -144,9 +148,9 @@ function ModulesContent() {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
-  console.log('GlbFile :',data?.glbFile)
+  console.log("GlbFile :", data?.glbFile);
 
-  const [selectedType, setSelectedType] = useState<string | null>('Annex');
+  const [selectedType, setSelectedType] = useState<string | null>("Annex");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const filteredModules = data
     ?.filter((module) =>
@@ -157,18 +161,22 @@ function ModulesContent() {
     );
   console.log(loading);
   console.log(error);
-  console.log('Data : ',data);
-  if (loading) return <div>Loading modules...</div>;
+  console.log("Data : ", data);
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+    </div>
+  );
   if (error) return <div>Error: {error}</div>;
-  if(data ){
-    console.log('GlbFile :',data[0]?.glbFile)
+  if (data) {
+    console.log("GlbFile :", data[0]?.glbFile);
   }
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC]">
+      <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC] mx-2">
         Modules
       </h3>
-      <div className="flex items-center border rounded-lg p-2 bg-[#fff] border border-[#E0E0E0]">
+      <div className="flex items-center border rounded-lg p-2 bg-[#fff] border border-[#E0E0E0] mx-2">
         <FaSearch className="mr-2" size={15} />
         <input
           type="text"
@@ -197,7 +205,7 @@ function ModulesContent() {
       <div className="flex flex-wrap gap-4 max-h-screen overflow-y-auto">
         {filteredModules && filteredModules.length > 0 ? (
           filteredModules.map((module) => (
-            <DesignCard design={module} key={module.id} type={'module'}/>
+            <DesignCard design={module} key={module.id} type={"module"} />
           ))
         ) : (
           <div>No modules found</div>

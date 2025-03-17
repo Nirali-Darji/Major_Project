@@ -61,6 +61,7 @@ const CanvasDropHandler = observer(() => {
             } catch (error) {
               console.error("Failed to parse drop data:", error);
             }
+            
           }
         };
         } 

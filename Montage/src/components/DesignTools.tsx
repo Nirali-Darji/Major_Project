@@ -17,8 +17,8 @@ function DesignTools() {
   const id = store.selectedModelId;
 
   return (
-    <Html position={[-5, 0, -5]}>
-      <div className="flex space-x-2 p-2 bg-white rounded-lg shadow-lg">
+    <Html >
+      <div className="flex space-x-2 p-2 absolute -top-40 -left-30 bg-white rounded-lg shadow-lg ">
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
           onClick={() => {
@@ -33,17 +33,17 @@ function DesignTools() {
         </button>
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-          //   onClick={() =>
-          //     setRotation([rotation[0], rotation[1] + Math.PI / 2, rotation[2]])
-          //   }
+            // onClick={() =>
+            //   store.flipHorizontal()
+            // }
         >
           <LuFlipHorizontal size={20} />
         </button>
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-          //   onClick={() =>
-          //     setRotation([rotation[0] + Math.PI / 2, rotation[1], rotation[2]])
-          //   }
+            // onClick={() =>
+            //   store.flipVertical()
+            // }
         >
           <LuFlipVertical size={20} />
         </button>

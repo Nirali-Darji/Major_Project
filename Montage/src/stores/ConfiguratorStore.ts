@@ -120,7 +120,7 @@ setShowDetails(value:boolean){
     }
   }
 
-  updateModelRotation(id: string, rotation: [number, number, number]) {
+  updateModelRotation(id: string, yRotation: number) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
       model.rotation[1] = yRotation;
@@ -215,6 +215,35 @@ setShowDetails(value:boolean){
   isBeingDragged(id: string) {
     return this.isDragging && this.selectedModelId === id;
   }
+
+  
+//   flipHorizontal() {
+//     if (this.selectedModelId) {
+//         const model = this.models.find((m) => m.id === this.selectedModelId);
+//         if (model && model.group.length > 0) {
+//             const scene = model.group[0].parent; // Get GLTF scene (THREE.Group)
+//             console.log('Scene :',scene)
+//             if (scene) {
+//                 scene.applyMatrix4(new THREE.Matrix4().scale(new THREE.Vector3(-1, 1, 1))); // Flip X-axis
+//             }
+            
+//         }
+//     }
+    
+// }
+
+// flipVertical() {
+//     if (this.selectedModelId) {
+//         const model = this.models.find((m) => m.id === this.selectedModelId);
+//         if (model && model.group.length > 0) {
+//             const scene = model.group[0].parent; // Get GLTF scene (THREE.Group)
+//             if (scene) {
+//                 scene.applyMatrix4(new THREE.Matrix4().scale(new THREE.Vector3(1, 1, -1))); // Flip Y-axis
+//             }
+//         }
+//     }
+// }
+
 }
 
 const store = new ConfiguratorStore();
