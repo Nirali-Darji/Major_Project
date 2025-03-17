@@ -43,16 +43,6 @@ const data ={
     }
 
 const DesignRightBar = () => {
-//   const [data, setData] = useState(null);
-
-//   useEffect(() => {
-//     // Simulate API call
-//     fetch('/api/tiny-home') 
-//       .then((res) => res.json())
-//       .then((data) => setData(data));
-//   }, []);
-
-//   if (!data) return <div>Loading...</div>;
 
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">

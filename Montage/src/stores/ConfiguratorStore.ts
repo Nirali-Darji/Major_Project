@@ -1,5 +1,7 @@
 import { computed, makeAutoObservable, action } from "mobx";
 import * as THREE from 'three';
+import { textureLoad } from "three/tsl";
+import loadTexture from "../utils/textureLoader";
 
 class ConfiguratorStore {
   models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh> }> = [];
@@ -73,10 +75,48 @@ setShowDetails(value:boolean){
     }
   }
 
- updateTexture(id: string, texture: THREE.Texture) {
+ async updateTexture(type: string, url: string) {
+    // const model = this.models.find((m) => m.id === id);
+    // const model = this.models.find((m) => m.id === this.selectedModelId);
+    if (!url) {
+      console.error("Invalid texture URL:", url);
+      return;
+    }
+    try{
+      const texture = await loadTexture(url)
+      console.log(texture)
+      if(this.selectedModelId){
+        if(type === 'Exterior Finish'){
+          this.updateExternalTexture(this.selectedModelId, texture);
+        };
+        if(type === 'Interior Wall Finish'){
+          this.updateInternalTexture(this.selectedModelId, texture);
+        };
+      }
+    }
+    catch(error){
+      console.log(error)
+    }
+    
+  }
+
+  updateExternalTexture(id: string, texture: THREE.Texture) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
-      model.texture = texture;
+      model.group.forEach((mesh) => {
+        if(mesh.name.includes('External')){
+        mesh.material.map = texture;}
+      });
+    }
+  }
+
+  updateInternalTexture(id: string, texture: THREE.Texture) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.group.forEach((mesh) => {
+        if(!mesh.name.includes('Internal')){
+        mesh.material.map = texture;}
+      });
     }
   }
 

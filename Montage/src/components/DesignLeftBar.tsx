@@ -144,6 +144,7 @@ function ModulesContent() {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
+  console.log('GlbFile :',data?.glbFile)
 
   const [selectedType, setSelectedType] = useState<string | null>('Annex');
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -156,9 +157,12 @@ function ModulesContent() {
     );
   console.log(loading);
   console.log(error);
-  console.log(data);
+  console.log('Data : ',data);
   if (loading) return <div>Loading modules...</div>;
   if (error) return <div>Error: {error}</div>;
+  if(data ){
+    console.log('GlbFile :',data[0]?.glbFile)
+  }
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC]">
