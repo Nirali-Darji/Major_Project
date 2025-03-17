@@ -203,22 +203,7 @@ useEffect(() => {
         <Edges threshold={15} color={0x000000} lineWidth={1} />
       </mesh>}
       
-      {isSelected && <Html>
-        <div style={{
-          position: 'absolute',
-          top: '-20px',
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          color: 'white',
-          padding: '2px 5px',
-          borderRadius: '3px',
-          fontSize: '10px',
-          userSelect: 'none',
-        }}>
-          {id.substring(0, 4)}
-          {isDragging ? ' (dragging)' : ''}
-          {isRotating ? ' (rotating)' : ''}
-        </div>
-      </Html>}
+      {isSelected && <DesignTools/>}
     </group>
   );
 });
