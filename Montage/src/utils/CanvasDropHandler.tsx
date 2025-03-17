@@ -23,7 +23,7 @@ const CanvasDropHandler = observer(() => {
   const mouse = useMemo(() => new THREE.Vector2(), []);
 
   useEffect(() => {
-    if(store.viewMode === '2D'){
+  
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
@@ -31,24 +31,13 @@ const CanvasDropHandler = observer(() => {
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
 
-      if (e.clientX !== undefined) {
-        const rect = gl.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        if(store.viewMode === '3D'){
+          store.setViewMode('2D')
+        }
         
-        
-        raycaster.setFromCamera(mouse, camera);
-        
-     
-        const didIntersect = raycaster.ray.intersectPlane(dragPlane, intersection);
-        
-        if (didIntersect) {
+       
           
-          const position: [number, number, number] = [
-            intersection.x,
-            intersection.y,
-            intersection.z
-          ];
+          const position: [number, number, number] = getInterSection(dragPlane,intersection,raycaster,camera,mouse,gl,e);
           
           const payload = e.dataTransfer?.getData("application/json");
           if (payload) {
@@ -61,9 +50,8 @@ const CanvasDropHandler = observer(() => {
             } catch (error) {
               console.error("Failed to parse drop data:", error);
             }
-            
-          }
-        };
+          
+       
         } 
       }
     
@@ -76,7 +64,7 @@ const CanvasDropHandler = observer(() => {
     return () => {
       canvas.removeEventListener('dragover', handleDragOver);
       canvas.removeEventListener('drop', handleDrop);
-    };}
+    }
   }, [gl, camera, raycaster, dragPlane, intersection, mouse]);
 
   return null;

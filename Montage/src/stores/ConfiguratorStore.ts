@@ -4,7 +4,7 @@ import { textureLoad } from "three/tsl";
 import loadTexture from "../utils/textureLoader";
 
 class ConfiguratorStore {
-  models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh> }> = [];
+  models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh>;scale: [number, number, number]; }  > = [];
   selectedModelId: string | null = null; // Changed from Set to single string
   viewMode: '2D' | '3D'| 'images' = '2D';
   baseModel:string=""
@@ -44,13 +44,15 @@ setShowDetails(value:boolean){
     }
 
     const rotation: [number, number, number] = [0, 0, 0];
+    const scale: [number, number, number] = [1, 1, 1];
     this.models.push({
       id,
       url,
       position,
       rotation,
       group: [],
-      gltfId
+      gltfId,
+      scale
     });
   }
 
@@ -68,6 +70,23 @@ setShowDetails(value:boolean){
   return model.position;
  }
   }
+
+  getModelScale(id: string) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      return model.scale;
+    }
+    return [1, 1, 1] as [number, number, number];
+  }
+
+  setModelScale(id: string, scale: [number,number,number]){
+    const model = this.models.find((m) => m.id === id);
+    if (model) {
+      model.scale = scale;
+    }
+  }
+
+
   addModelToGroup(id: string, mesh: THREE.Mesh) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
@@ -215,34 +234,6 @@ setShowDetails(value:boolean){
   isBeingDragged(id: string) {
     return this.isDragging && this.selectedModelId === id;
   }
-
-  
-//   flipHorizontal() {
-//     if (this.selectedModelId) {
-//         const model = this.models.find((m) => m.id === this.selectedModelId);
-//         if (model && model.group.length > 0) {
-//             const scene = model.group[0].parent; // Get GLTF scene (THREE.Group)
-//             console.log('Scene :',scene)
-//             if (scene) {
-//                 scene.applyMatrix4(new THREE.Matrix4().scale(new THREE.Vector3(-1, 1, 1))); // Flip X-axis
-//             }
-            
-//         }
-//     }
-    
-// }
-
-// flipVertical() {
-//     if (this.selectedModelId) {
-//         const model = this.models.find((m) => m.id === this.selectedModelId);
-//         if (model && model.group.length > 0) {
-//             const scene = model.group[0].parent; // Get GLTF scene (THREE.Group)
-//             if (scene) {
-//                 scene.applyMatrix4(new THREE.Matrix4().scale(new THREE.Vector3(1, 1, -1))); // Flip Y-axis
-//             }
-//         }
-//     }
-// }
 
 }
 

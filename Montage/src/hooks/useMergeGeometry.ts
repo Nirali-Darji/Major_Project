@@ -13,7 +13,7 @@ const useMergeGeometry = (gltf, id) => {
           if (child.isMesh) {
             store.addModelToGroup(id, child);
             if (child.name.includes("Roof")) {
-              return; // Skip this mesh
+              return;
             }
 
             

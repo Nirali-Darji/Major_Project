@@ -4,16 +4,14 @@ import store from "../stores/ConfiguratorStore"
 import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei"
 
 const CameraSetUp = observer(() => {
-    // Get scene dimensions for setting up orthographic camera
     const { viewport } = useThree()
     const aspect = viewport.width / viewport.height
     
-    // Orthographic camera parameters
     const orthoZoom = 10
     const orthoNear = 0.1
     const orthoFar = 1000
   
-    const perspectiveFov = 45; // Field of view
+    const perspectiveFov = 45;
     const perspectiveNear = 0.1;
     const perspectiveFar = 1000;
     
@@ -35,7 +33,7 @@ const CameraSetUp = observer(() => {
             right={aspect * orthoZoom}
             top= {orthoZoom}
             bottom={-orthoZoom}
-            up={[0, 0, -1]} // Adjust up vector for top-down view
+            up={[0, 0, -1]} 
           />
         )}
       </>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import store from "../stores/ConfiguratorStore";
 import getInterSection from "../utils/getInterSection";
+import gsap from "gsap";
 
 const useRotationInteraction = (
   id,
@@ -15,32 +16,23 @@ const useRotationInteraction = (
 ) => {
   const [isRotating, setIsRotating] = useState(false);
   const [rotatingCornerIndex, setRotatingCornerIndex] = useState(-1);
-  // const startAngle = useRef(0);
-  const currentRotation = useRef(0);
   const lastDragPoint = useRef(null);
-  const animationStartTime = useRef(0);
-  const animationStartRotation = useRef(0);
-  const animationTargetRotation = useRef(0);
-  const isAnimating = useRef(false);
-
-  // Animation parameters
-  const ANIMATION_DURATION = 300; // ms
+  const rotationTween = useRef(null);
+  const initialRotation = useRef(0);
 
   // Normalize angle to range [0, 2π)
   const normalizeAngle = (angle) => {
     return ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
   };
 
-  // Choose shortest rotation path
-  const getShortestRotation = (from, to) => {
-    const diff = normalizeAngle(to) - normalizeAngle(from);
-    if (diff > Math.PI) return diff - 2 * Math.PI;
-    if (diff < -Math.PI) return diff + 2 * Math.PI;
-    return diff;
-  };
-
   const onRotateMove = (e) => {
-    if (!isRotating || isAnimating.current) return;
+    if (!isRotating) return;
+
+    // Kill any existing animation
+    if (rotationTween.current) {
+      rotationTween.current.kill();
+      rotationTween.current = null;
+    }
 
     const newPoint = getInterSection(
       dragPlane,
@@ -52,12 +44,12 @@ const useRotationInteraction = (
       e
     );
 
-    // First-time initialization of lastDragPoint
-    if (!lastDragPoint.current) {
-      lastDragPoint.current = newPoint;
+    if (!newPoint || !lastDragPoint.current) {
+      if (newPoint) lastDragPoint.current = newPoint;
       return;
     }
 
+    // Calculate rotation angle based on intersection points
     const newAngle = Math.atan2(
       newPoint[2] - modelCenter.z,
       newPoint[0] - modelCenter.x
@@ -68,59 +60,57 @@ const useRotationInteraction = (
       lastDragPoint.current[0] - modelCenter.x
     );
 
-    // Calculate shortest rotation path
-    const angleDiff = getShortestRotation(prevAngle, newAngle);
-    
-    // Update rotation in the store
-    const newRotation = normalizeAngle(currentRotation.current - angleDiff);
+    // Calculate angle difference
+    let angleDiff = newAngle - prevAngle;
+
+    // Ensure shortest path
+    if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+    if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+    // Get current rotation and apply the difference
+    const currentRotation = store.getModelRotation(id);
+    const newRotation = normalizeAngle(currentRotation - angleDiff);
+
+    // Update model rotation
     store.updateModelRotation(id, newRotation);
-    currentRotation.current = newRotation;
-    
+
     // Update last drag point
     lastDragPoint.current = newPoint;
   };
 
-  const updateAnimation = () => {
-    if (!isAnimating.current) return;
+  const snapToNearestAngle = () => {
+    // Get current rotation
+    const currentRotation = store.getModelRotation(id);
 
-    const elapsed = Date.now() - animationStartTime.current;
-    const progress = Math.min(elapsed / ANIMATION_DURATION, 1);
-    
-    // Easing function (cubic ease-out)
-    const easedProgress = 1 - Math.pow(1 - progress, 3);
-    
-    const rotationDiff = getShortestRotation(
-      animationStartRotation.current,
-      animationTargetRotation.current
-    );
-    
-    const currentRot = normalizeAngle(
-      animationStartRotation.current + rotationDiff * easedProgress
-    );
-    
-    // Apply the rotation through the store
-    store.updateModelRotation(id, currentRot);
-    
-    if (progress < 1) {
-      // Continue animation
-      requestAnimationFrame(updateAnimation);
-    } else {
-      // Animation complete
-      store.updateModelRotation(id, animationTargetRotation.current);
-      currentRotation.current = animationTargetRotation.current;
-      isAnimating.current = false;
-    }
-  };
+    // Calculate nearest 90-degree increment
+    const degrees = (currentRotation * 180) / Math.PI;
+    const snappedDegrees = Math.round(degrees / 90) * 90;
+    const snappedRadians = (snappedDegrees * Math.PI) / 180;
 
-  const startSnapAnimation = (currentRot, targetRot) => {
-    // Store animation parameters
-    animationStartRotation.current = currentRot;
-    animationTargetRotation.current = targetRot;
-    animationStartTime.current = Date.now();
-    isAnimating.current = true;
-    
-    // Start animation loop
-    requestAnimationFrame(updateAnimation);
+    // Ensure we use the shortest path to target angle
+    let diff = snappedRadians - currentRotation;
+    if (diff > Math.PI) diff -= 2 * Math.PI;
+    if (diff < -Math.PI) diff += 2 * Math.PI;
+
+    // Animate to the snapped angle
+    rotationTween.current = gsap.to(
+      {},
+      {
+        duration: 0.5,
+        ease: "power3.out",
+        onUpdate: function () {
+          const progress = this.progress();
+          const rotationValue = normalizeAngle(
+            currentRotation + diff * progress
+          );
+          store.updateModelRotation(id, rotationValue);
+        },
+        onComplete: () => {
+          store.updateModelRotation(id, normalizeAngle(snappedRadians));
+          rotationTween.current = null;
+        },
+      }
+    );
   };
 
   const onRotateUp = () => {
@@ -129,34 +119,32 @@ const useRotationInteraction = (
     setIsRotating(false);
     setRotatingCornerIndex(-1);
     gl.domElement.style.cursor = "auto";
-    lastDragPoint.current = null;
 
-    // Calculate nearest 90 degree increment
-    const currentRot = normalizeAngle(store.getModelRotation(id));
-    const degrees = (currentRot * 180) / Math.PI;
-    const snappedDegrees = Math.round(degrees / 90) * 90;
-    const snappedRadians = normalizeAngle((snappedDegrees * Math.PI) / 180);
-    
-    // Start smooth animation to snapped angle (using shortest path)
-    startSnapAnimation(currentRot, snappedRadians);
-    
+    // Snap to nearest 90 degree increment
+    snapToNearestAngle();
+
+    lastDragPoint.current = null;
     window.removeEventListener("pointermove", onRotateMove);
     window.removeEventListener("pointerup", onRotateUp);
   };
 
   const startRotating = (e, cornerIndex) => {
-    // Stop any ongoing animation
-    isAnimating.current = false;
-    
+    // Kill any existing animation
+    if (rotationTween.current) {
+      rotationTween.current.kill();
+      rotationTween.current = null;
+    }
+
     setIsRotating(true);
     setRotatingCornerIndex(cornerIndex);
 
     // Reset last drag point
     lastDragPoint.current = null;
 
-    // Get current rotation from store
-    currentRotation.current = normalizeAngle(store.getModelRotation(id));
+    // Store initial rotation
+    initialRotation.current = store.getModelRotation(id);
 
+    // Get intersection point
     const clickPoint = getInterSection(
       dragPlane,
       intersection,
@@ -166,9 +154,10 @@ const useRotationInteraction = (
       gl,
       e
     );
-    
-    // Initialize lastDragPoint
-    lastDragPoint.current = clickPoint;
+
+    if (clickPoint) {
+      lastDragPoint.current = clickPoint;
+    }
 
     gl.domElement.style.cursor = "grab";
 
@@ -176,11 +165,12 @@ const useRotationInteraction = (
     window.addEventListener("pointerup", onRotateUp);
   };
 
-  // Set up and clean up animation frame
+  // Clean up event listeners and animations on unmount
   useEffect(() => {
     return () => {
-      // Force cleanup if component unmounts during animation
-      isAnimating.current = false;
+      if (rotationTween.current) {
+        rotationTween.current.kill();
+      }
       window.removeEventListener("pointermove", onRotateMove);
       window.removeEventListener("pointerup", onRotateUp);
     };

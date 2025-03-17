@@ -14,6 +14,7 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             child.material.transparent = true;
             child.material.opacity = 0;
             child.visible = false;
+            child.parent.visible = false;
           }
 
           if(child.name.includes("Node")){
@@ -35,7 +36,7 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
       ref={ref}
       position={position}
       rotation-y={store.getModelRotation(id)}
-      scale={[1, 1, 1]} 
+      scale={store.getModelScale(id)} 
     >
       
       <primitive object={gltf.scene.clone()} />
