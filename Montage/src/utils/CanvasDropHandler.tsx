@@ -23,13 +23,16 @@ const CanvasDropHandler = observer(() => {
   const mouse = useMemo(() => new THREE.Vector2(), []);
 
   useEffect(() => {
-    if(store.viewMode === '2D'){
+  
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
     };
 
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();    
+      if(store.viewMode === '3D'){
+        store.setViewMode('2D');
+      }
           const position: [number, number, number] = getInterSection(dragPlane, intersection, raycaster, camera, mouse, gl, e);
           
           const url = e.dataTransfer?.getData('text/plain');
@@ -47,7 +50,7 @@ const CanvasDropHandler = observer(() => {
     return () => {
       canvas.removeEventListener('dragover', handleDragOver);
       canvas.removeEventListener('drop', handleDrop);
-    };}
+    }
   }, [gl, camera, raycaster, dragPlane, intersection, mouse]);
 
   return null;

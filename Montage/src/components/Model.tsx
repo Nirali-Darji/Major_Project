@@ -7,7 +7,14 @@ import Model3D from "./Model3D"
 import { useEffect, useState } from "react"
 
 const Model = observer(({ id, url, position }: { id: string, url: string, position: [number, number, number] }) => {
-  const gltf = useLoader(GLTFLoader, url)
+  const gltf = useLoader(GLTFLoader, url);
+  if (gltf && gltf.scene) {
+    gltf.scene.traverse((child) => {
+      if (child.isMesh) {
+        store.addModelToGroup(id, child);
+      }
+    });
+  }
   const [lastSelected2DModelId, setLastSelected2DModelId] = useState("");
   useEffect(() => {
     if (store.viewMode === '3D') {
