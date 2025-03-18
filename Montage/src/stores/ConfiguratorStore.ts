@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 class ConfiguratorStore {
   models: Array<{ id: string; gltfId?: string; url: string; position: [number, number, number]; rotation: [number, number, number]; group: Array<THREE.Mesh>;scale: [number, number, number]; }  > = [];
-  selectedModelId: string | null = null; // Changed from Set to single string
+  selectedModelId: string | null = null; 
   viewMode: '2D' | '3D' = '2D';
   
   // Dragging state

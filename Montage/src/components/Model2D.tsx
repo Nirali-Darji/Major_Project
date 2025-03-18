@@ -13,7 +13,6 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const isSelected = store.isSelected(id);
   const isDragging = store.isBeingDragged(id);
   const position = store.geModelPosition(id);
-  const scale = store.getModelScale(id);
   const rotation = store.getModelRotation(id);
   const [isHovered, setIsHovered] = useState(false);
   const { camera, raycaster, mouse, gl } = useThree();
@@ -244,14 +243,22 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       onPointerDown={onPointerDown}
       onPointerOver={() => setIsHovered(true)}
       onPointerOut={() => setIsHovered(false)}
-      scale={scale}
+      // scale={scale}
     >
       {mergedGeometry && (
-        <mesh geometry={mergedGeometry} material={material}>
-          <Edges threshold={15} color={0x000000} lineWidth={1} />
-        </mesh>
-      )}
-
+  <>
+    <mesh geometry={mergedGeometry} material={material}>
+      {/* Use a higher threshold and width to make edges more visible */}
+      <Edges threshold={15} color={0x000000} lineWidth={2} />
+    </mesh>
+    
+    {/* Add a wireframe version to ensure all edges are visible */}
+    <lineSegments>
+      <edgesGeometry args={[mergedGeometry]} />
+      <lineBasicMaterial color="#000000" linewidth={1} />
+    </lineSegments>
+  </>
+)}
       {isSelected && (
         <Html>
           <div

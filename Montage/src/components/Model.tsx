@@ -15,6 +15,7 @@ const Model = observer(({ id, url, position }: { id: string, url: string, positi
       }
     });
   }
+
   const [lastSelected2DModelId, setLastSelected2DModelId] = useState("");
   useEffect(() => {
     if (store.viewMode === '3D') {
