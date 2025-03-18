@@ -14,7 +14,7 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             child.material.transparent = true;
             child.material.opacity = 0;
             child.visible = false;
-            child.parent.visible = false;
+            // child.parent.visible = false;
           }
 
           if(child.name.includes("Node")){
