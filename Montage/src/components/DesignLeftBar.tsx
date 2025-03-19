@@ -102,7 +102,7 @@ const DesignContent = observer(({ handleClick }) => {
   const [isListView, setIsListView] = useState(false);
   const models = store.models;
   const dataArray = Array.isArray(data) ? data : [data];
-
+  console.log(dataArray);
   const filteredDesigns = models
     .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
     .filter(Boolean);

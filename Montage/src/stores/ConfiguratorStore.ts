@@ -124,7 +124,9 @@ setShowDetails(value:boolean){
     if (model) {
       model.group.forEach((mesh) => {
         if(mesh.name.includes('External')){
-        mesh.material.map = texture;}
+        mesh.material.map = texture;
+        mesh.material.needsUpdate = true;
+      }
       });
     }
   }
@@ -134,7 +136,9 @@ setShowDetails(value:boolean){
     if (model) {
       model.group.forEach((mesh) => {
         if(!mesh.name.includes('Internal')){
-        mesh.material.map = texture;}
+        mesh.material.map = texture;
+        mesh.material.needsUpdate = true;
+      }
       });
     }
   }

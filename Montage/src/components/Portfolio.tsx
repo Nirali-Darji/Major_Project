@@ -1,18 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import Leftbar from "./PortfolioLeftBar";
 import Navbar from "./PortfolioNavBar";
 import Toolbar from "./Toolbar";
 import PortfolioContent from "./PortfolioContent";
 
 function Portfolio() {
+  // const [selectedPortfolio, setSelectedPortfolio] = useState("");
+
   return (
-    <div>
+    <div className="overflow-hidden">
+      {/* <Navbar />
+      <div className="flex">
+      <Leftbar 
+          selectedPortfolio={selectedPortfolio} 
+          setSelectedPortfolio={setSelectedPortfolio} 
+        />
+        <div className="w-full flex flex-col gap-4 m-4">
+          <Toolbar selectedPortfolio={selectedPortfolio}/>
+          <PortfolioContent selectedPortfolio={selectedPortfolio} />
+        </div>
+      </div> */}
+
       <Navbar />
       <div className="flex">
-        <Leftbar />
+        <Leftbar
+         
+        />
         <div className="w-full flex flex-col gap-4 m-4">
           <Toolbar />
-          <PortfolioContent />
+          <PortfolioContent  />
         </div>
       </div>
     </div>

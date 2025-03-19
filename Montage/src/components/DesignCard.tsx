@@ -17,7 +17,7 @@ const DesignCard = ({ design, type, index }) => {
 
   const model = store.models.find((model) => model.gltfId === design?.id);
   const id = model?.id;
-  console.log(id)
+  console.log('id :',id)
   
 
   const baseModelId = store.models.find((m) => m.id === store.baseModel);
