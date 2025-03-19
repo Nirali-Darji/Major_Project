@@ -14,6 +14,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const isDragging = store.isBeingDragged(id);
   const position = store.geModelPosition(id);
   const rotation = store.getModelRotation(id);
+  const scale = store.getModelScale(id);
   const [isHovered, setIsHovered] = useState(false);
   const { camera, raycaster, mouse, gl } = useThree();
   const [boundingBoxInfo, setBoundingBoxInfo] = useState(null);
@@ -44,7 +45,22 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     []
   );
 
-  const mergedGeometry = useMergeGeometry(gltf, id);
+  const { geometry, nodeEndpoints } = useMergeGeometry(gltf, id, modelCenter);
+  const convertedNodes = nodeEndpoints.map(node => ({
+    start: new THREE.Vector3(node.start.x, node.start.y ?? 0, node.start.z),
+    end: new THREE.Vector3(node.end.x, node.end.y ?? 0, node.end.z),
+  }));
+
+  const relativeVector = convertedNodes.map(node => {
+    return {
+      start: node.start.clone().add(modelCenter),
+      end: node.end.clone().add(modelCenter),
+    };
+  })
+
+
+
+
   const { startDragging } = useDragInteractions(
     id,
     gl,
@@ -73,11 +89,11 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
     const flipMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
   
-  mergedGeometry?.applyMatrix4(flipMatrix);
+    // geometry?.applyMatrix4(flipMatrix);
   
   store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
   
-  mergedGeometry?.computeVertexNormals();
+  // geometry?.computeVertexNormals();
   };
 
   const mirrorVertically = () => {
@@ -140,7 +156,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   useEffect(() => {
     cleanupBoundingBox();
 
-    if (!groupRef.current || !mergedGeometry) {
+    if (!groupRef.current || !geometry) {
       setBoundingBoxInfo(null);
       return;
     }
@@ -151,11 +167,11 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     }
 
     const geomBoundingBox =
-      mergedGeometry.boundingBox ||
-      (mergedGeometry.computeBoundingBox(), mergedGeometry.boundingBox);
+      geometry.boundingBox ||
+      (geometry.computeBoundingBox(), geometry.boundingBox);
 
-    const min = geomBoundingBox.min.clone();
-    const max = geomBoundingBox.max.clone();
+    const min = geomBoundingBox.min;
+    const max = geomBoundingBox.max;
 
     const yPos = 4; // Use consistent height
 
@@ -223,7 +239,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     return () => {
       cleanupBoundingBox();
     };
-  }, [store.selectedModelId, isSelected, isHovered, mergedGeometry]);
+  }, [store.selectedModelId, isSelected, isHovered, geometry]);
 
   
   useEffect(() =>{
@@ -232,10 +248,12 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
  
 
   return (
+    <>
     <group
       ref={groupRef}
       position={position}
-      rotation-y={rotation} // Use this format for Three.js rotation in React Three Fiber
+      rotation-y={rotation} 
+      scale={scale}
       onClick={(e) => {
         e.stopPropagation();
         store.selectModel(id);
@@ -245,16 +263,16 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       onPointerOut={() => setIsHovered(false)}
       // scale={scale}
     >
-      {mergedGeometry && (
+      {geometry && (
   <>
-    <mesh geometry={mergedGeometry} material={material}>
+    <mesh geometry={geometry} material={material}>
       {/* Use a higher threshold and width to make edges more visible */}
       <Edges threshold={15} color={0x000000} lineWidth={2} />
     </mesh>
     
     {/* Add a wireframe version to ensure all edges are visible */}
     <lineSegments>
-      <edgesGeometry args={[mergedGeometry]} />
+      <edgesGeometry args={[geometry]} />
       <lineBasicMaterial color="#000000" linewidth={1} />
     </lineSegments>
   </>
@@ -319,7 +337,28 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
           </div>
         </Html>
       )}
+      
     </group>
+    {
+      store.nodes?.map((endpoint) => (
+       endpoint.modelId === id &&
+        <>
+        <mesh
+          position={[endpoint?.center[0] +  modelCenter.x,4,endpoint?.center[2] + modelCenter.z]}
+        >
+          <sphereGeometry args={[0.1]} />
+          <meshBasicMaterial color="red" />
+        </mesh>
+        {/* <mesh
+        position={[endpoint?.start.x,4,endpoint?.start.z]}
+      >
+        <sphereGeometry args={[0.1]} />
+        <meshBasicMaterial color="red" />
+      </mesh> */}
+      </>
+      ))
+    }
+    </>
   );
 });
 
