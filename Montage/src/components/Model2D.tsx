@@ -13,7 +13,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const groupRef = useRef<THREE.Group>(null);
   const isSelected = store.isSelected(id);
   const isDragging = store.isBeingDragged(id);
-  const position = store.geModelPosition(id);
+  const position = store.getModelPosition(id);
   const scale = store.getModelScale(id);
   const rotation = store.getModelRotation(id);
   const [isHovered, setIsHovered] = useState(false);
@@ -251,7 +251,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
         <Edges threshold={15} color={0x000000} lineWidth={1} />
       </mesh>}
       
-      {isSelected && <DesignTools/>}
+      {isSelected && <DesignTools mirrorHorizontal ={mirrorHorizontally} mirrorVertical ={mirrorVertically}/>}
     </group>
   );
 });

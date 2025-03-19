@@ -9,7 +9,7 @@ function Toolbar() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   return (
-    <div className="flex justify-between w-full p-2">
+    <div className="flex justify-between w-full border-b-2 border-[#DCDCDC] pb-2">
       <div>
         <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-sm shadow hover:bg-gray-800 transition" onClick={() => navigate("/design")}>
           <FaPlus />

@@ -64,7 +64,7 @@ setShowDetails(value:boolean){
     return 0;
   }
 
-  geModelPosition(id:string){
+  getModelPosition(id:string){
  const model = this.models.find((m) => m.id === id);
  if(model){
   return model.position;
