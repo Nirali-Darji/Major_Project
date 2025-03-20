@@ -66,9 +66,12 @@ const DesignCard = ({ design, type, index }) => {
           alt="Card Image"
           className="w-[80%] m-auto object-cover p-4"
           draggable={type === "module"}
-          onDragStart={(e) =>
-            type === "module" && handleDragStart(e, design.glbFile, design.id)
-          }
+          onDragStart={(e) => {
+            if (type === "module") {
+              handleDragStart(e, design.glbFile, design.id);
+              store.setViewMode('2D'); 
+            }
+          }}
         />
       </div>
 

@@ -1,29 +1,60 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import CanvasSetup from './CanvasSetup';
 import store from '../stores/ConfiguratorStore';
 import ViewModeToggle from './ViewModeToggle';
 import SelectionBar from './SelectionBar';
 import { observer } from 'mobx-react-lite';
+import * as THREE from "three";
+import { Html } from '@react-three/drei';
 
 
-const ScreenshotButton = () => {
-    const takeScreenshot = () => {
-      const canvas = document.querySelector('canvas');
-      if (canvas) {
-        const link = document.createElement('a');
-        link.download = `configurator-${store.viewMode}-view.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+export const ScreenshotButton = () => {
+  const { gl ,scene,camera} = useThree();
+
+  const takeSnapShot = () => {
+    const htmlElements = document.querySelectorAll('canvas');
+    const originalVisibility: boolean[] = [];
+
+    const originalClearColor = new THREE.Color();
+    gl.getClearColor(originalClearColor);
+    const originalClearAlpha = gl.getClearAlpha();
+    gl.setClearColor("white", 1);
+    
+    htmlElements.forEach((el, index) => {
+      originalVisibility[index] = el.classList.contains("visible");
+      el.classList.remove("visible");
+      el.classList.add("hidden");
+    });
+
+    gl.render(scene, camera);
+
+    const dataUrl = gl.domElement.toDataURL("image/png");
+
+    htmlElements.forEach((el, index) => {
+      el.classList.remove("hidden");
+      if (originalVisibility[index]) {
+        el.classList.add("visible");
       }
-    };
+    });
+
+    gl.setClearColor(originalClearColor, originalClearAlpha);
+    gl.render(scene, camera);
+
+    const link = document.createElement("a");
+    link.href = dataUrl;
+    link.download = "screenshot.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   
     return (
-      <button
-        className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        onClick={takeScreenshot}
+      <Html
       >
+        <button onClick={takeSnapShot}>
         Take Screenshot
-      </button>
+          </button>
+      </Html>
     );
   };
 
@@ -63,7 +94,7 @@ const Temp = observer(() => {
               ))}
             </ul>
           </div>
-          <ScreenshotButton />
+          {/* <ScreenshotButton /> */}
         </div>
   
         {/* Canvas Container */}
@@ -75,6 +106,8 @@ const Temp = observer(() => {
       </div>
     );
   });
+
+
 
 export default Temp
 

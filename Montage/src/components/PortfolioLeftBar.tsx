@@ -1,12 +1,10 @@
-
-
 import React, { useState, useEffect } from "react";
 import { FaRegFolder, FaSearch } from "react-icons/fa";
 import ApiFetcher from "../utils/ApiFetcher";
 import generalStore from "../stores/GeneralStore";
 import { observer } from "mobx-react-lite";
 
-function Leftbar() {
+function Leftbar({setShowModal}) {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/portfolios`, 
   });
@@ -20,13 +18,22 @@ function Leftbar() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error loading portfolios.</p>;
 
+  const handleOnchange= (e) => {
+    const selectedValue = e.target.value;
+    if(selectedValue === "Create portfolio") {
+      setShowModal(true);
+    }else {
+      generalStore.setSelectedPortfolio(selectedValue);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 w-1/5 p-2 border-r border-[#DCDCDC] min-h-screen">
       <div className="flex justify-between pb-2  mx-2">
         {/* Dropdown for Portfolios */}
         <select
           value={generalStore.selectedPortfolio}
-          onChange={(e) => generalStore.setSelectedPortfolio(e.target.value)}
+          onChange={handleOnchange}
           className=" rounded-lg p-1 bg-white outline-none w-full"
         >
           {data?.portFolios?.map((portfolio) => (
@@ -34,8 +41,9 @@ function Leftbar() {
               {portfolio.name}
             </option>
           ))}
+          <option value= "Create portfolio" className="text-gray-500">Create Portfolio</option>
         </select>
-        <FaRegFolder className="mt-auto mb-auto" />
+        {/* <FaRegFolder className="mt-auto mb-auto" /> */}
       </div>
       <div className="flex items-center border rounded-lg p-2 bg-[#fff] border border-[#E0E0E0] mx-2">
         <FaSearch className="mr-2" size={15} />
@@ -60,3 +68,6 @@ function Leftbar() {
 }
 
 export default observer(Leftbar);
+
+
+

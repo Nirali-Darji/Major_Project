@@ -108,7 +108,7 @@ const DesignContent = observer(({ handleClick }) => {
     .filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 ">
       {/* Header with View Toggle */}
       <div className="flex justify-between border-b-1 border-[#DCDCDC] px-2 py-2">
         <h3 className="text-lg font-semibold">Design</h3>

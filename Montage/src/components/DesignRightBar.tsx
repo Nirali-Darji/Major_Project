@@ -34,23 +34,46 @@ const TinyHomeSelector = () => {
   //     setSelectedMaterials(initialSelection);
   //   }
   // }, [data]);
+  // useEffect(() => {
+  //   if (data?.subStyleList?.length > 0) {
+  //     const initialSelection = {};
+  
+  //     data.subStyleList.forEach((substyle) => {
+  //       if (substyle.materialList.length > 0) {
+  //         const firstMaterial = substyle.materialList[0]; // Select first material by default
+  //         initialSelection[substyle.name] = firstMaterial;
+  
+  //         generalStore.setSelectedSubstyleId(substyle.name, substyle.id);
+  //         generalStore.setSelectedMaterial(substyle.name, firstMaterial);
+  //       }
+  //     });
+  
+  //     setSelectedMaterials(initialSelection);
+  //   }
+  // }, [data]);
   useEffect(() => {
     if (data?.subStyleList?.length > 0) {
       const initialSelection = {};
+      const configuredStyles = [];
   
       data.subStyleList.forEach((substyle) => {
         if (substyle.materialList.length > 0) {
-          const firstMaterial = substyle.materialList[0]; // Select first material by default
+          const firstMaterial = substyle.materialList[0];
+  
           initialSelection[substyle.name] = firstMaterial;
   
-          generalStore.setSelectedSubstyleId(substyle.name, substyle.id);
-          generalStore.setSelectedMaterial(substyle.name, firstMaterial);
+          configuredStyles.push({ subStyleId: substyle.id, selectedMaterialId: firstMaterial.id });
+          store.updateTexture(substyle.name, firstMaterial.imageURL);
         }
       });
   
       setSelectedMaterials(initialSelection);
+  
+      generalStore.setConfiguredStyles(configuredStyles);
     }
   }, [data]);
+  
+  
   
 
   useEffect(() => {
@@ -84,20 +107,31 @@ const TinyHomeSelector = () => {
   //   console.log(material)
   //   store.updateTexture(substyleName, material.imageURL);
   // };
-  const handleMaterialSelect = (substyleName: string, substyleId: string, material: any) => {
-    generalStore.setSelectedSubstyleId(substyleName, substyleId);
+  // const handleMaterialSelect = (substyleName: string, substyleId: string, material: any) => {
+  //   generalStore.setSelectedSubstyleId(substyleName, substyleId);
   
-    generalStore.setSelectedMaterial(substyleName, material);
-    console.log('store :',toJS(generalStore.selectedSubstyleId))
+  //   generalStore.setSelectedMaterial(substyleName, material);
+  //   console.log('store :',toJS(generalStore.selectedSubstyleId))
+  
+  //   setSelectedMaterials((prev) => ({
+  //     ...prev,
+  //     [substyleName]: material,
+  //   }));
+  
+  //   store.updateTexture(substyleName, material.imageURL);
+  // };
+  const handleMaterialSelect = (substyleName, subStyleId, material) => {
+    generalStore.updateConfiguredStyle(subStyleId, material.id);
   
     setSelectedMaterials((prev) => ({
       ...prev,
       [substyleName]: material,
     }));
-  
+    console.log('store :',toJS(generalStore.configuredStyle))
+    console.log(substyleName)
+
     store.updateTexture(substyleName, material.imageURL);
   };
-
   return (
     <div className="p-6 w-90 mx-auto bg-white shadow-md space-y-4 max-h-screen overflow-y-auto z-10">
       <div className="text-center">
@@ -113,7 +147,7 @@ const TinyHomeSelector = () => {
                 <div className="w-full h-60 bg-gray-100">
                   <img
                     // src={selectedMaterials[substyle.name]?.imageURL || substyle.imageURL}
-                    src={generalStore.selectedMaterials[substyle.name]?.materialData.imageURL || substyle.imageURL}
+                    src={selectedMaterials[substyle.name]?.imageURL || substyle.imageURL}
                     alt={substyle.name}
                     className="w-full h-full object-cover"
                   />

@@ -31,7 +31,7 @@ function PortfolioContent() {
         </button> */}
 
         {dropdownOpen && (
-          <div className="absolute top-0 left-full mt-2 bg-white shadow-md rounded-md py-2 border border-gray-200 z-10">
+          <div className="absolute top-0 left-full mt-2 bg-white shadow-md rounded-md py-2 border border-gray-200">
             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               Rename
             </button>
@@ -92,7 +92,7 @@ function PortfolioCard({ design }) {
       <div className="flex justify-between items-center relative">
         <div className="flex flex-col">
           <h2 className="text-lg font-semibold text-gray-800">{design.name}</h2>
-          <p className="text-sm text-gray-500">Models: {design.length}</p>
+          <p className="text-sm text-gray-500">Models: {design.moduleArr.length}</p>
         </div>
         <div className="relative">
           <button
