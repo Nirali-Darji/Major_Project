@@ -23,7 +23,6 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   );
   
 
-  // Create the drag plane for pointer interactions
   const dragPlane = useMemo(() => {
     const plane = new THREE.Plane();
     plane.setFromNormalAndCoplanarPoint(
@@ -45,19 +44,8 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     []
   );
 
-  const { geometry, nodeEndpoints } = useMergeGeometry(gltf, id, modelCenter);
-  const convertedNodes = nodeEndpoints.map(node => ({
-    start: new THREE.Vector3(node.start.x, node.start.y ?? 0, node.start.z),
-    end: new THREE.Vector3(node.end.x, node.end.y ?? 0, node.end.z),
-  }));
-
-  const relativeVector = convertedNodes.map(node => {
-    return {
-      start: node.start.clone().add(modelCenter),
-      end: node.end.clone().add(modelCenter),
-    };
-  })
-
+  const { geometry } = useMergeGeometry(gltf, id, modelCenter);
+  
 
 
 
@@ -87,13 +75,9 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const mirrorHorizontally = () => {
     const currentScale = store.getModelScale(id);
     const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
-    const flipMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
-  
-    // geometry?.applyMatrix4(flipMatrix);
-  
+   
   store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
   
-  // geometry?.computeVertexNormals();
   };
 
   const mirrorVertically = () => {
@@ -261,16 +245,13 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       onPointerDown={onPointerDown}
       onPointerOver={() => setIsHovered(true)}
       onPointerOut={() => setIsHovered(false)}
-      // scale={scale}
     >
       {geometry && (
   <>
     <mesh geometry={geometry} material={material}>
-      {/* Use a higher threshold and width to make edges more visible */}
-      <Edges threshold={15} color={0x000000} lineWidth={2} />
+      <Edges threshold={15} color={0x000000} lineWidth={1} />
     </mesh>
     
-    {/* Add a wireframe version to ensure all edges are visible */}
     <lineSegments>
       <edgesGeometry args={[geometry]} />
       <lineBasicMaterial color="#000000" linewidth={1} />
@@ -349,12 +330,6 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
           <sphereGeometry args={[0.1]} />
           <meshBasicMaterial color="red" />
         </mesh>
-        {/* <mesh
-        position={[endpoint?.start.x,4,endpoint?.start.z]}
-      >
-        <sphereGeometry args={[0.1]} />
-        <meshBasicMaterial color="red" />
-      </mesh> */}
       </>
       ))
     }

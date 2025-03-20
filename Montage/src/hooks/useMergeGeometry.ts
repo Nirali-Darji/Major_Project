@@ -6,15 +6,11 @@ import store from '../stores/ConfiguratorStore';
 const useMergeGeometry = (gltf, id, modelCenter) => {
   const scale = store.getModelScale(id);
 
-  const { geometry, nodeEndpoints } = useMemo(() => {
+  const { geometry } = useMemo(() => {
     const geometries = [];
-    const endpoints = [];
 
     if (gltf && gltf.scene) {
     gltf.scene.updateMatrixWorld(true);
-
-      
-    const modelPosition = new THREE.Vector3().copy(gltf.scene.position);
 
     gltf.scene.traverse((child) => {
         if (child.isMesh) {
@@ -22,58 +18,22 @@ const useMergeGeometry = (gltf, id, modelCenter) => {
           if (child.name.includes("Roof")) return;
 
           const geometryForMerge = child.geometry.clone();
-          geometryForMerge.applyMatrix4(child.matrixWorld); // Apply world transformation
+          geometryForMerge.applyMatrix4(child.matrixWorld); 
 
           if (!geometryForMerge.attributes.uv) {
             const uvs = new Float32Array(geometryForMerge.attributes.position.count * 2);
             geometryForMerge.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
           }
 
-          // Set colors
+          
           const colors = new Float32Array(geometryForMerge.attributes.position.count * 3);
           const color = new THREE.Color();
 
           if (child.name.includes("Node")) {
             color.set("cyan");
 
-            const nodeGeometry = child.geometry.clone();
-            nodeGeometry.applyMatrix4(child.matrixWorld);
-
-            const nodeBox = new THREE.Box3().setFromBufferAttribute(nodeGeometry.attributes.position);
-            const nodeSize = new THREE.Vector3();
-            nodeBox.getSize(nodeSize);
-            const primaryAxis = nodeSize.x > nodeSize.z ? 'x' : 'z';
-
-            const nodeCenter = new THREE.Vector3();
-            nodeBox.getCenter(nodeCenter);
-            const modelToNodeVector = new THREE.Vector3().subVectors(nodeCenter, modelCenter);
-
-            const startPoint = new THREE.Vector3();
-            const endPoint = new THREE.Vector3();
-            const directionVector = primaryAxis === 'x' ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
-            directionVector.normalize();
-
-            const halfLength = primaryAxis === 'x' ? nodeSize.x / 2 : nodeSize.z / 2;
-            startPoint.copy(nodeCenter).sub(directionVector.clone().multiplyScalar(halfLength));
-            endPoint.copy(nodeCenter).add(directionVector.clone().multiplyScalar(halfLength));
-
-            // store.setNodes(
-            //   id, 
-            //   [startPoint.x, 0, startPoint.z], 
-            //   [endPoint.x, 0, endPoint.z], 
-            //   [nodeCenter.x, 0, nodeCenter.z]
-            // );
-
-            endpoints.push({
-              nodeName: child.name,
-              start: { x: startPoint.x, z: startPoint.z },
-              end: { x: endPoint.x, z: endPoint.z },
-              center: { x: nodeCenter.x, z: nodeCenter.z },
-              modelPosition: { x: modelPosition.x, z: modelPosition.z },
-              modelToNode: { x: modelToNodeVector.x, z: modelToNodeVector.z }
-            });
           } else if (child.name.includes("Floor")) {
-            color.set("#fefefe");
+            color.set("#f0f0f0");
           } else {
             color.set("#ffffff");
           }
@@ -99,10 +59,10 @@ const useMergeGeometry = (gltf, id, modelCenter) => {
       }
     }
 
-    return { geometry: mergedGeometry, nodeEndpoints: endpoints };
+    return { geometry: mergedGeometry };
   }, [gltf, id, scale]);
 
-  return { geometry, nodeEndpoints };
+  return { geometry };
 };
 
 export default useMergeGeometry;

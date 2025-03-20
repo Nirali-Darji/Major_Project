@@ -1,4 +1,4 @@
-import { computed, makeAutoObservable, action, runInAction } from "mobx";
+import { computed, makeAutoObservable, action } from "mobx";
 import * as THREE from "three";
 
 interface nodes {
@@ -7,6 +7,7 @@ interface nodes {
   start: [number, number, number];
   end: [number, number, number];
   center: [number, number, number];
+  primaryAxes: string;
 }
 interface models {
   id: string;
@@ -22,7 +23,6 @@ class ConfiguratorStore {
   selectedModelId: string | null = null;
   viewMode: "2D" | "3D" = "2D";
   nodes: Array<nodes> = [];
-  // Dragging state
   isDragging: boolean = false;
   dragStartPosition: [number, number, number] | null = null;
   dragOffset: [number, number, number] = [0, 0, 0];
@@ -88,18 +88,14 @@ class ConfiguratorStore {
         return;
     }
 
-    // Compute scale factors
     const scaleFactorX = newScale[0] / model.scale[0];
     const scaleFactorY = newScale[1] / model.scale[1];
     const scaleFactorZ = newScale[2] / model.scale[2];
 
     if (scaleFactorX === 1 && scaleFactorY === 1 && scaleFactorZ === 1) return;
 
-    // Scaling matrix
     const scaleMatrix = new THREE.Matrix4().makeScale(scaleFactorX, scaleFactorY, scaleFactorZ);
 
-    // Use world position instead of local if possible
-    const modelCenter = new THREE.Vector3(model.position[0], model.position[1], model.position[2]);
 
     modelNodes.forEach(node => {
 
@@ -126,7 +122,6 @@ class ConfiguratorStore {
     if (model) {
       this.updateNodesOnScaling(id, scale);
       model.scale = scale;
-      // model.group[0].scale.set(scale[0], scale[1], scale[2])
     }
   }
 
@@ -172,36 +167,32 @@ class ConfiguratorStore {
     
     const rotationMatrix = new THREE.Matrix4().makeRotationY(rotationDiff);
     
-    // Update each node's position
     modelNodes.forEach(node => {
-      const start = new THREE.Vector3(
-        node.start[0],
-        node.start[1],
-        node.start[2]
-      );
-      
-      const end = new THREE.Vector3(
-        node.end[0],
-        node.end[1],
-        node.end[2]
-      );
-      
+      const start = new THREE.Vector3(node.start[0], node.start[1], node.start[2]);
+      const end = new THREE.Vector3(node.end[0], node.end[1], node.end[2]);
+
       start.applyMatrix4(rotationMatrix);
       end.applyMatrix4(rotationMatrix);
       
       const center = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-      
+
+      const rotatedDirection = new THREE.Vector3().subVectors(end, start).normalize();
+      const newPrimaryAxis = Math.abs(rotatedDirection.x) > Math.abs(rotatedDirection.z) ? 'x' : 'z';
+
       node.start = [start.x, start.y, start.z];
       node.end = [end.x, end.y, end.z];
       node.center = [center.x, center.y, center.z];
+      node.primaryAxes = newPrimaryAxis; 
     });
-  }
+
+    model.rotation[1] = yRotation;
+}
+
   updateModelRotation(id: string, yRotation: number) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
       this.updateNodesOnRotation(id, yRotation);
       model.rotation[1] = yRotation;
-      // Update node positions to match the new rotation
     }
   }
 
@@ -236,6 +227,8 @@ class ConfiguratorStore {
   removeSelectedModel() {
     if (this.selectedModelId) {
       this.models = this.models.filter((m) => m.id !== this.selectedModelId);
+      this.nodes = this.nodes.filter(node => node.modelId !== this.selectedModelId);
+      console.log(this.nodes);
       this.selectedModelId = null;
     }
   }
@@ -265,7 +258,7 @@ class ConfiguratorStore {
       clickPoint[2] - model.position[2],
     ];
 
-    return true; // Successfully started dragging
+    return true; 
   }
 
   continueDragging(newPoint: [number, number, number]) {
@@ -283,12 +276,12 @@ class ConfiguratorStore {
       newPoint[2] - this.dragOffset[2]
     );
   
-    const threshold = 1; // Distance within which nodes should snap
+    const threshold = 1;  
     let snapped = false;
   
     for (let currentNode of currentNodes) {
       const currentCenter = new THREE.Vector3(
-        currentNode.center[0] + newPosition.x,
+        currentNode.center[0] + newPosition.x,-
         currentNode.center[1] + newPosition.y,
         currentNode.center[2] + newPosition.z
       );
@@ -303,10 +296,11 @@ class ConfiguratorStore {
           otherNode.center[2] + otherStartModel.position[2]
         );
   
-        if (currentCenter.distanceTo(otherCenter) < threshold) {
+        if (currentCenter.distanceTo(otherCenter) < threshold && currentNode.primaryAxes === otherNode.primaryAxes) {
           if (this.checkModelOverlap(currentModel, otherStartModel)) {
             continue;
           }
+        
           const snapOffset = otherCenter.clone().sub(currentCenter);
           newPosition.add(snapOffset);
           console.log("object snapped");
@@ -348,20 +342,10 @@ checkModelOverlap(modelA: models, modelB: models): boolean {
     return this.isDragging && this.selectedModelId === id;
   }
 
-  setNodes(modelId: string, start: [number, number, number], end: [number, number, number], center: [number, number, number]) {
-    const existingNode = this.nodes.find(node => 
-        node.modelId === modelId && 
-        node.center[0] === center[0] && 
-        node.center[1] === center[1] && 
-        node.center[2] === center[2]
-    );
-
-    if (existingNode) return; // Avoid duplicate nodes
-
+  setNodes(modelId: string, start: [number, number, number], end: [number, number, number], center: [number, number, number], primaryAxes: string) {
     const id: string = Math.random().toString(36).substr(2, 9);
-    this.nodes.push({ id, modelId, start, end, center });
+    this.nodes.push({ id, modelId, start, end, center, primaryAxes });
     console.log(this.nodes)
-
 }
 
 
