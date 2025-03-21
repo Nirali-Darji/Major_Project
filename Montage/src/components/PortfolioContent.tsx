@@ -10,6 +10,9 @@ function PortfolioContent() {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/portfolios`,
   });
+  const { data: moduleData, loading: moduleLoading, error: moduleError } = ApiFetcher({
+    endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
+  });
 
   console.log("Portfolios :", data);
 
@@ -18,6 +21,19 @@ function PortfolioContent() {
   const portfolio = data?.portFolios?.find(
     (portfolio) => portfolio.name === generalStore.selectedPortfolio
   );
+  const updatedPortfolio = portfolio
+    ? {
+        ...portfolio,
+        designs: portfolio.designs.map((design) => ({
+          ...design,
+          moduleArr: design.moduleArr.map((module) => ({
+            ...module,
+            glbFile: moduleData?.find((m) => m.id === module.moduleId)?.glbFile || null,
+          })),
+        })),
+      }
+    : null;
+    console.log(updatedPortfolio);
 
   return (
     <div>
@@ -42,25 +58,11 @@ function PortfolioContent() {
         )}
       </div>
 
-      {/* <div className="flex gap-4 flex-wrap">
-        {data?.portFolios?.map((portfolio) => (
-          <div key={portfolio.id} className="w-full">
-            <h2 className="text-xl font-semibold mb-4">{portfolio.name}</h2>
-            <div className="flex gap-4 flex-wrap">
-              {portfolio.designs?.map((design) => (
-                <PortfolioCard key={design.id} design={design} />
-              ))}
-            </div>
-            <hr className="w-full my-4 border-t border-gray-300" />
-          </div>
-        ))}
-      </div> */}
-
-      {portfolio ? (
+      {updatedPortfolio ? (
         <div className="w-full">
-          {/* <h2 className="text-xl font-semibold mb-4">{portfolio.name}</h2> */}
+          {/* <h2 className="text-xl font-semibold mb-4">{updatedPortfolio.name}</h2> */}
           <div className="flex gap-4 flex-wrap">
-            {portfolio.designs?.map((design) => (
+            {updatedPortfolio.designs?.map((design) => (
               <PortfolioCard key={design.id} design={design} />
             ))}
           </div>
@@ -75,13 +77,14 @@ function PortfolioContent() {
 function PortfolioCard({ design }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(design.monogramImage);
-
+  console.log('ModuleArr',design.moduleArr)
   return (
     <div className="w-80 bg-white shadow-lg rounded-2xl p-4 flex flex-col gap-3 border border-gray-200 relative">
       <div
         className="w-60 h-60 overflow-hidden rounded-xl"
         onMouseEnter={() => setImageSrc(design.designImage)}
         onMouseLeave={() => setImageSrc(design.monogramImage)}
+        // onClick={() => store.setDesign(design.moduleArr)}
       >
         <img
           src={imageSrc}
