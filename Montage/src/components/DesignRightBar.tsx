@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import ApiFetcher from "../utils/ApiFetcher";
 import store from "../stores/ConfiguratorStore";
-import { reaction, toJS } from "mobx";
+import { reaction } from "mobx";
 import generalStore from "../stores/GeneralStore";
+import { postRequest } from "../utils/saveDesign";
 
 const TinyHomeSelector = () => {
   const { data, loading, error } = ApiFetcher({
@@ -24,6 +25,7 @@ const TinyHomeSelector = () => {
     totalBathrooms: 0,
     totalSize: 0,
   });
+  const [cost,setCost] = useState(0);
   useEffect(() => {
     if (data?.subStyleList?.length > 0) {
       const initialSelection = {};
@@ -50,27 +52,31 @@ const TinyHomeSelector = () => {
   }, [data]);
 
   useEffect(() => {
+    if (moduleData && store.models.length > 0) {
+      setTotals(totalUtility(moduleData, store.models));
+      setCost(totalCost(moduleData, store.models)); 
+    }
+  }, [moduleData, store.models]); 
+
+  useEffect(() => {
     const dispose = reaction(
       () => store.models.slice(), // Watches models array
       (models) => {
         if (moduleData) {
           if (models.length === 0) {
-            setTotals({ totalBedRooms: 0, totalBathrooms: 0, totalSize: 0 }); // Reset to zero
+            setTotals({ totalBedRooms: 0, totalBathrooms: 0, totalSize: 0 });
+            setCost(0); // Reset cost when no models exist
           } else {
             setTotals(totalUtility(moduleData, models));
+            setCost(totalCost(moduleData, models)); // Update cost state
           }
-
-          console.log(
-            "cost :",
-            models.length > 0 ? totalCost(moduleData, models) : 0
-          );
         }
       }
     );
-
+  
     return () => dispose();
   }, [moduleData]);
-
+  
   if (loading || moduleLoading)
     return (
       <div className="flex justify-center items-center min-h-screen bg-white">
@@ -89,6 +95,33 @@ const TinyHomeSelector = () => {
 
     store.updateTexture(substyleName, material.imageURL);
   };
+
+
+  const handleOrderNow = async() => {
+    if(generalStore.designId ===""){
+      alert("Please save your design first!");
+    }
+    else{
+      const response = await postRequest({
+        url: `${import.meta.env.VITE_API_BASE_URL}/stripe-checkout`,
+        body: {
+          "designId":`${generalStore.designId}`,
+          "packageId":"5e489a12-0067-4cf8-be1e-58cd8594e942",
+          "packageAddonsIds":["9c515ced-cee4-4ad6-8723-1a747ad367c1"],
+          "additionalOptIds":[1],
+          "address":{
+              "firstName":"John",
+              "lastName":"Doe",
+              "phone":"123456789",
+              "email":"pruthav@hexacoder.com"
+          }
+      },
+      });
+      console.log(response);
+      window.open(response.clientSecret, "_self");
+    }
+  }
+
   return (
     <div className="p-6 w-90 mx-auto bg-white shadow-md space-y-4 h-[calc(105vh-100px)] overflow-y-auto z-10">
       <div className="text-center">
@@ -150,11 +183,11 @@ const TinyHomeSelector = () => {
       </div>
       <div className="sticky bottom-0 left-0 w-full bg-white shadow-lg p-4 flex justify-between items-center">
         <div>
-          <p className="text-lg font-bold">${totals.totalSize * 150}</p>{" "}
+          <p className="text-lg font-bold">{cost}</p>{" "}
           {/* Example cost calculation */}
           <p className="text-xs text-gray-500">Estimated Construction Cost</p>
         </div>
-        <button className="bg-black text-sm text-white px-2 py-2 rounded cursor-not-allowed">
+        <button className="bg-black text-sm text-white px-2 py-2 rounded" onClick={handleOrderNow}>
           Order Now
         </button>
       </div>
@@ -189,13 +222,6 @@ const totalCost = (moduleData, models) => {
     .map((model) => moduleData.find((item) => item?.id === model.gltfId))
     .filter(Boolean);
     console.log("Filtered Design",filteredDesigns)
-  // return filteredDesigns.reduce(
-  //   (acc, design) => {
-  //     acc.totalCost += design?.pricePerSqft || 0;
-  //     return acc;
-  //   },
-  //   { totalCost: 0 }
-  // );
   let totalCost = 0;
   for (let i = 0; i < filteredDesigns.length; i++) {
     console.log("index",filteredDesigns[i]);
@@ -204,21 +230,3 @@ const totalCost = (moduleData, models) => {
   }
   return totalCost;
 };
-// const totalCost = (moduleData, models) => {
-//   let totalCost = 0;
-
-//   if (!Array.isArray(moduleData)) {
-//     moduleData = [moduleData];
-//   }
-
-//   for (let i = 0; i < models.length; i++) {
-//     for (let j = 0; j < moduleData.length; j++) {
-//       if (moduleData[j].id === models[i].gltfId) {
-//         totalCost += moduleData[j].pricePerSqft || 0;
-//         break;
-//       }
-//     }
-//   }
-
-//   return totalCost;
-// };

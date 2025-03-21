@@ -24,12 +24,10 @@ function DesignModel() {
         </Canvas>
       </div>
 
-      {/* UI Components */}
       <div className="relative z-10 ">
         <div className="absolute fixed left-0 top-0 z-20 w-full">
           <DesignNavBar />
         </div>
-        {/* <div className="flex justify-between"> */}
         <div className="absolute fixed left-0 top-17 bottom-0 z-20">
           <DesignLeftBar />
         </div>
@@ -50,10 +48,8 @@ function DesignModel() {
             onClose={() => store.setShowDetails(false)}
           />
         )}
-        {/* </div> */}
       </div>
 
-      {/* Toggle Right Bar Button */}
       <div
         className={`fixed bottom-4 ${
           showRightBar ? "right-95" : "right-10"

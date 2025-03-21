@@ -5,8 +5,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Portfolio from "./components/Portfolio";
 import DesignModel from "./components/DesignModel";
-import DesignCard from './components/DesignCard';
-import SelectedModelDetails from './components/SelectedModelDetails';
+import OrderPackage from './components/OrderPackage';
 
 
 const App = observer(() => {
@@ -18,7 +17,8 @@ const App = observer(() => {
         <Route path="/register" element={<Register />} />
         {/* <Route path="/" element={<Portfolio />} /> */}
         <Route path="/design" element={<DesignModel />} />
-        <Route path="/details" element={<SelectedModelDetails  />} />
+        <Route path="/details" element={<OrderPackage  />} />
+
         </Routes>
     </Router>
   );

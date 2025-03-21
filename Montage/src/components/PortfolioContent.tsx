@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ApiFetcher from "../utils/ApiFetcher";
 import store from "../stores/ConfiguratorStore";
 import { BsThreeDots } from "react-icons/bs";
@@ -37,14 +37,6 @@ function PortfolioContent() {
   return (
     <div>
       <div className="flex gap-6 mb-4">
-        {/* <h2>My designs</h2>
-        <button
-          className="p-2 rounded-full hover:bg-gray-100"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-        >
-          <BsThreeDots className="text-gray-600" />
-        </button> */}
-
         {dropdownOpen && (
           <div className="absolute top-0 left-full mt-2 bg-white shadow-md rounded-md py-2 border border-gray-200">
             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -59,7 +51,6 @@ function PortfolioContent() {
 
       {updatedPortfolio ? (
         <div className="w-full">
-          {/* <h2 className="text-xl font-semibold mb-4">{updatedPortfolio.name}</h2> */}
           <div className="flex gap-4 flex-wrap">
             {updatedPortfolio.designs?.map((design) => (
               <PortfolioCard key={design.id} design={design} />
@@ -81,8 +72,12 @@ function PortfolioCard({ design }) {
 
   const handleLoadDesign = () => {
     store.loadModels(design.moduleArr);
+    store.setViewMode("2D");
+    generalStore.currentDesignName = design.name;
+    generalStore.setDesignId(design.id);
     navigate("/design");
   }
+
   return (
     <div className="w-80 bg-white shadow-lg rounded-2xl p-4 flex flex-col gap-3 border border-gray-200 relative">
       <div

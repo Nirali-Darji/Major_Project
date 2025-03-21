@@ -11,6 +11,8 @@ function Leftbar({setShowModal}) {
 
   useEffect(() => {
     if (data?.portFolios?.length > 0) {
+      localStorage.setItem("portfolioId", data.portFolios[0].id);
+      localStorage.setItem("portfolioName", data.portFolios[0].name);  
       generalStore.setSelectedPortfolio(generalStore.selectedPortfolio || data.portFolios[0].name);
     }
   }, [data]);
@@ -18,14 +20,23 @@ function Leftbar({setShowModal}) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error loading portfolios.</p>;
 
-  const handleOnchange= (e) => {
+  const handleOnchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
-    if(selectedValue === "Create portfolio") {
+  
+    if (selectedValue === "Create portfolio") {
       setShowModal(true);
-    }else {
-      generalStore.setSelectedPortfolio(selectedValue);
+    } else {
+      const selectedPortfolio = data?.portFolios.find(portfolio => portfolio.name === selectedValue);
+      
+      if (selectedPortfolio) {
+        localStorage.setItem("portfolioId", selectedPortfolio.id); 
+        console.log(selectedPortfolio);
+        localStorage.setItem("portfolioName", selectedPortfolio.name);
+        generalStore.setSelectedPortfolio(selectedValue);
+      }
     }
   };
+  
 
   return (
     <div className="flex flex-col gap-4 w-1/5 p-2 border-r border-[#DCDCDC] min-h-screen">
