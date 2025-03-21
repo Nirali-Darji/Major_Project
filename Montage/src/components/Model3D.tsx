@@ -8,22 +8,20 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
 
   useEffect(() => {
     if (gltf && gltf.scene) {
+      console.log(gltf)
       gltf.scene.traverse((child: any) => {
-        if (child.isMesh) {
-          if(child.name.includes("Roof")){
-            child.material.transparent = true;
-            child.material.opacity = 0;
+          if(child.name.includes("Roof") || child.name.includes("Ceiling")){
             child.visible = false;
-            // child.parent.visible = false;
+            return;
           }
-
-          if(child.name.includes("Node")){
+          if(child.name.includes("Node") && child.isMesh){
             child.material.transparent = true;
             child.material.color.set("cyan");
             child.material.opacity = 0.7;
+            return;
           }
          child.raycast =() =>{} 
-        }
+        
       });
     }
 

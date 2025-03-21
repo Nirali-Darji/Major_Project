@@ -11,13 +11,14 @@ import { observer } from "mobx-react-lite";
 import { Html } from "@react-three/drei";
 import store from "../stores/ConfiguratorStore";
 import SelectedModelDetails from "./SelectedModelDetails";
+import { div } from "three/tsl";
 
-function DesignTools() {
+function DesignTools({ mirrorHorizontal, mirrorVertical }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const id = store.selectedModelId;
 
   return (
-    <Html >
+    <Html>
       <div className="flex space-x-2 p-2 absolute -top-40 -left-30 bg-white rounded-lg shadow-lg ">
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
@@ -33,17 +34,13 @@ function DesignTools() {
         </button>
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-            // onClick={() =>
-            //   store.flipHorizontal()
-            // }
+          onClick={mirrorHorizontal}
         >
           <LuFlipHorizontal size={20} />
         </button>
         <button
           className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-            // onClick={() =>
-            //   store.flipVertical()
-            // }
+          onClick={mirrorVertical}
         >
           <LuFlipVertical size={20} />
         </button>
@@ -61,7 +58,9 @@ function DesignTools() {
         </button>
         {/* Render dropdown if visible */}
         {showDropdown && (
-          <DropdownMenu onClose={() => setShowDropdown(false)} />
+
+<div  className="absolute top-0 left-full ml-4 z-[9999] w-55 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <DropdownMenu onClose={() => setShowDropdown(false)} className ="absolute top-0 left-full" /></div>
         )}
       </div>
     </Html>
@@ -70,16 +69,20 @@ function DesignTools() {
 
 export default observer(DesignTools);
 
-function DropdownMenu({ onClose }) {
-//   const [isLock, setIsLock] = useState(false);
-// const [showDetails, setShowDetails] = useState(false);
+export function DropdownMenu({ onClose }) {
+  //   const [isLock, setIsLock] = useState(false);
+  // const [showDetails, setShowDetails] = useState(false);
   const id = store.selectedModelId;
   const modelDetails = getModelDetails(id);
+  const positions = store.getModelPosition(id);
+  console.log(positions);
 
   return (
-    <div className="absolute top-0 left-full ml-4 z-10 w-55 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
-      <button className="text-sm font-medium text-gray-500 mb-3" onClick={() => store.setShowDetails(true)}>
-        
+    <div>
+      <button
+        className="text-sm font-medium text-gray-500 mb-3"
+        onClick={() => store.setShowDetails(true)}
+      >
         View Module Details
       </button>
 
@@ -87,7 +90,7 @@ function DropdownMenu({ onClose }) {
         <button
           className="flex items-center justify-between w-full p-2 hover:bg-gray-100 rounded-lg"
           onClick={() =>
-            store.addModel(modelDetails?.url, [0, 0, 0], modelDetails?.gltfId)
+            store.addModel(modelDetails?.url, [positions[0] +1, positions[1], positions[2]+1], modelDetails?.gltfId)
           }
         >
           <div className="flex items-center space-x-2">
@@ -132,9 +135,7 @@ function DropdownMenu({ onClose }) {
       >
         Close
       </button>
-    
     </div>
-    
   );
 }
 export const getModelDetails = (id) => {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
-import DesignNavBar from "./DesignNavBar";
 import DesignLeftBar from "./DesignLeftBar";
 import DesignRightBar from "./DesignRightBar";
 import DisplayOption from "./DisplayOption";
@@ -9,6 +8,8 @@ import CanvasSetup from "./CanvasSetup";
 import { observer } from "mobx-react-lite";
 import store from "../stores/ConfiguratorStore";
 import SelectedModelDetails from "./SelectedModelDetails";
+import { ScreenshotButton } from "./Temp";
+import DesignNavBar from "./DesignNavbar";
 
 function DesignModel() {
   const [showRightBar, setShowRightBar] = useState(true);
@@ -18,6 +19,8 @@ function DesignModel() {
       <div className="flex-1 fixed top-0 left-0 w-full h-full z-0">
         <Canvas>
           <CanvasSetup />
+        <ScreenshotButton />
+
         </Canvas>
       </div>
 
@@ -27,7 +30,7 @@ function DesignModel() {
           <DesignNavBar />
         </div>
         {/* <div className="flex justify-between"> */}
-        <div className="absolute fixed left-0 top-16  z-20">
+        <div className="absolute fixed left-0 top-17  z-20">
           <DesignLeftBar />
         </div>
         <DisplayOption />
@@ -40,7 +43,7 @@ function DesignModel() {
             </div>
           )}  */}
         <div
-          className={`absolute fixed right-0 top-16 z-20 transition-all duration-300 ${
+          className={`absolute fixed right-0 top-17 z-20 transition-all duration-300 ${
             showRightBar ? "w-90" : "w-0 overflow-hidden"
           }`}
         >

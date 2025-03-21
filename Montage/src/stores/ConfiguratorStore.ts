@@ -175,16 +175,21 @@ setShowDetails(value:boolean){
       return;
     }
     try{
-      const texture = await loadTexture(url)
-      console.log(texture)
-      if(this.selectedModelId){
+      const texture = await loadTexture(url);
+      this.models.map((model) => {
         if(type === 'Exterior Finish'){
-          this.updateExternalTexture(this.selectedModelId, texture);
-        };
-        if(type === 'Interior Wall Finish'){
-          this.updateInternalTexture(this.selectedModelId, texture);
-        };
-      }
+          this.updateExternalTexture(model.id, texture);
+          console.log("object")
+        }
+        else if(type === 'Interior Wall Finish'){
+          this.updateInternalTexture(model.id, texture);
+        }
+        else if(type === 'Interior Floor Finish'){
+          this.updateInternalFloorTexture(model.id, texture);
+        }
+      })
+        
+      
     }
     catch(error){
       console.log(error)
@@ -196,9 +201,10 @@ setShowDetails(value:boolean){
     const model = this.models.find((m) => m.id === id);
     if (model) {
       model.group.forEach((mesh) => {
-        if (mesh.name.includes("External")) {
-          mesh.material.map = texture;
-        }
+        if(mesh.name.includes('External')){
+        mesh.material.map = texture;
+        mesh.material.needsUpdate = true;
+      }
       });
     }
   }
@@ -206,10 +212,24 @@ setShowDetails(value:boolean){
   updateInternalTexture(id: string, texture: THREE.Texture) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
-      model.group.forEach((mesh) => {
-        if (!mesh.name.includes("Internal")) {
-          mesh.material.map = texture;
-        }
+      model.group.map((mesh) => {
+        if(mesh.name.includes('Interior')){
+        mesh.material.map = texture;
+        mesh.material.needsUpdate = true;
+      }
+      });
+    }
+  }
+
+
+  updateInternalFloorTexture(id: string, texture: THREE.Texture) {
+    const model = this.models.find((m) => m.id === id);
+    if (model) {    
+      model.group.map((mesh) => {
+        if(mesh.name.includes('Floor')){
+        mesh.material.map = texture;
+        mesh.material.needsUpdate = true;
+      }
       });
     }
   }

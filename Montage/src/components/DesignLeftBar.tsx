@@ -15,6 +15,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 import DesignCard from "./DesignCard";
+import ListViewCard from "./ListViewCard";
 export default function DesignLeftBar() {
   const [activeTab, setActiveTab] = useState("design");
   const [isContentVisible, setIsContentVisible] = useState(true);
@@ -81,14 +82,9 @@ export default function DesignLeftBar() {
         </div>
       </div>
 
-      {/* Content Area */}
-      {/* {isContentVisible && (
-        <div className="flex-1 p-2 w-80">{renderContent()}</div>
-      )} */}
-
       <div
         className={`transition-all duration-300 ${
-          isContentVisible ? "w-80" : "w-0 overflow-hidden"
+          isContentVisible ? "w-80 h-full overflow-y-auto" : "w-0 overflow-hidden"
         }`}
       >
         {renderContent()}
@@ -101,44 +97,87 @@ const DesignContent = observer(({ handleClick }) => {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
+
+  const [isListView, setIsListView] = useState(false);
   const models = store.models;
-  console.log(toJS(models));
-  console.log(data);
   const dataArray = Array.isArray(data) ? data : [data];
   console.log(dataArray);
+  // const filteredDesigns = models
+  //   .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+  //   .filter(Boolean);
   const filteredDesigns = models
-    .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+    .map((model) => {
+      const design = dataArray.find((item) => item?.id === model.gltfId);
+      return design ? { ...design, modelId: model.id } : null;
+    })
     .filter(Boolean);
-  console.log(filteredDesigns);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-between border-b-1 border-[#DCDCDC]">
-        <h3 className="text-lg font-semibold mx-2">Design</h3>
+    <div className="flex flex-col gap-2 h-full">
+      {/* Header with View Toggle */}
+      <div className="flex justify-between border-b-1 border-[#DCDCDC] px-2 py-2">
+        <h3 className="text-lg font-semibold">Design</h3>
         <div className="flex">
-          <div className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition">
+          {/* Grid View Button */}
+          <div
+            className={`flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition ${
+              !isListView ? "bg-gray-300" : ""
+            }`}
+            onClick={() => setIsListView(false)}
+          >
             <LuLayoutGrid className="text-lg font-semibold" />
           </div>
-          <div className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition">
+
+          {/* List View Button */}
+          <div
+            className={`flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-200 rounded-lg transition ${
+              isListView ? "bg-gray-300" : ""
+            }`}
+            onClick={() => setIsListView(true)}
+          >
             <FaList className="text-lg font-semibold" />
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap gap-4 max-h-[] overflow-y-auto ">
-        {/* <DesignCard type={'design'} /> */}
-        {filteredDesigns.map((design, index) => (
-          <DesignCard design={design} type="design" index={index + 1} />
-        ))}
-        <div className="w-full bg-white rounded-2xl shadow-lg group mx-2 hover:border-2 border-black flex items-center justify-center h-64">
-          <button
-            className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
-            onClick={() => {
-              handleClick();
-            }}
-          >
-            <FaPlus color="white" size={20} />
-          </button>
-        </div>
+
+      {/* List or Grid Rendering */}
+      <div className="flex flex-wrap gap-4 h-full overflow-y-auto">
+        {isListView
+          ? filteredDesigns.map((design, index) => (
+              <ListViewCard key={index} design={design} modelId={design.modelId} index={index + 1} />
+            ))
+          : filteredDesigns.map((design, index) => (
+              <DesignCard
+                key={index}
+                design={design}
+                modelId={design.modelId} // Passing the model's id
+                type="design"
+                index={index + 1}
+              />
+            ))}
+
+        {!isListView && (
+          <div className="w-full bg-white rounded-2xl shadow-lg group mx-2 hover:border-2 border-black flex items-center justify-center h-64">
+            <button
+              className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
+              onClick={() => handleClick()}
+            >
+              <FaPlus color="white" size={20} />
+            </button>
+          </div>
+        )}
+
+        {isListView && (
+          <div className=" w-full bg-white py-3 shadow-lg flex justify-between items-center px-4">
+            <span className="text-lg font-semibold">Add Module</span>
+            <button
+              className="flex justify-center items-center rounded-full bg-gray-200 p-3 hover:bg-gray-400"
+              onClick={() => handleClick()}
+            >
+              <FaPlus color="white" size={20} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -162,11 +201,12 @@ function ModulesContent() {
   console.log(loading);
   console.log(error);
   console.log("Data : ", data);
-  if (loading) return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+      </div>
+    );
   if (error) return <div>Error: {error}</div>;
   if (data) {
     console.log("GlbFile :", data[0]?.glbFile);
@@ -202,7 +242,9 @@ function ModulesContent() {
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap gap-4 max-h-screen overflow-y-auto">
+      <div
+        className="flex flex-wrap gap-4 h-full overflow-y-auto"
+      >
         {filteredModules && filteredModules.length > 0 ? (
           filteredModules.map((module) => (
             <DesignCard design={module} key={module.id} type={"module"} />
