@@ -84,7 +84,7 @@ export default function DesignLeftBar() {
 
       <div
         className={`transition-all duration-300 ${
-          isContentVisible ? "w-80" : "w-0 overflow-hidden"
+          isContentVisible ? "w-80 h-full overflow-y-auto" : "w-0 overflow-hidden"
         }`}
       >
         {renderContent()}
@@ -92,7 +92,6 @@ export default function DesignLeftBar() {
     </div>
   );
 }
-
 
 const DesignContent = observer(({ handleClick }) => {
   const { data, loading, error } = ApiFetcher({
@@ -103,12 +102,18 @@ const DesignContent = observer(({ handleClick }) => {
   const models = store.models;
   const dataArray = Array.isArray(data) ? data : [data];
   console.log(dataArray);
+  // const filteredDesigns = models
+  //   .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+  //   .filter(Boolean);
   const filteredDesigns = models
-    .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
+    .map((model) => {
+      const design = dataArray.find((item) => item?.id === model.gltfId);
+      return design ? { ...design, modelId: model.id } : null;
+    })
     .filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-2 ">
+    <div className="flex flex-col gap-2 h-full">
       {/* Header with View Toggle */}
       <div className="flex justify-between border-b-1 border-[#DCDCDC] px-2 py-2">
         <h3 className="text-lg font-semibold">Design</h3>
@@ -136,15 +141,16 @@ const DesignContent = observer(({ handleClick }) => {
       </div>
 
       {/* List or Grid Rendering */}
-      <div className="flex flex-wrap gap-4 max-h-screen overflow-y-auto">
+      <div className="flex flex-wrap gap-4 h-full overflow-y-auto">
         {isListView
           ? filteredDesigns.map((design, index) => (
-              <ListViewCard key={index} design={design} index={index + 1} />
+              <ListViewCard key={index} design={design} modelId={design.modelId} index={index + 1} />
             ))
           : filteredDesigns.map((design, index) => (
               <DesignCard
                 key={index}
                 design={design}
+                modelId={design.modelId} // Passing the model's id
                 type="design"
                 index={index + 1}
               />
@@ -197,7 +203,7 @@ function ModulesContent() {
   console.log("Data : ", data);
   if (loading)
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center h-full">
         <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
       </div>
     );
@@ -237,9 +243,7 @@ function ModulesContent() {
         ))}
       </div>
       <div
-        className="flex flex-wrap gap-4 max-h-screen
-      
-      overflow-y-auto"
+        className="flex flex-wrap gap-4 h-full overflow-y-auto"
       >
         {filteredModules && filteredModules.length > 0 ? (
           filteredModules.map((module) => (

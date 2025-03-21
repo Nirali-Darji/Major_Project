@@ -6,7 +6,7 @@ import { observer } from "mobx-react-lite";
 import { GoHomeFill } from "react-icons/go";
 
 
-const DesignCard = ({ design, type, index }) => {
+const DesignCard = ({ design, type,modelId, index }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -15,28 +15,20 @@ const DesignCard = ({ design, type, index }) => {
     e.dataTransfer.setData("application/json", payload);
   };
 
-  const model = store.models.find((model) => model.gltfId === design?.id);
-  const id = model?.id;
-  console.log('id :',id)
-  
-
-  const baseModelId = store.models.find((m) => m.id === store.baseModel);
-  const isBaseModel = baseModelId?.gltfId === design?.id; // Compare gltfId with design.id
-
   return (
     <div
       className={`relative w-full mx-2 bg-white rounded-2xl shadow-lg overflow-hidden group hover:border-2 ${
-        type === "design" && store.isSelected(id)
+        type === "design" && store.isSelected(modelId)
           ? "border-yellow-500 border-2"
           : "border-black"
       }`}
       onClick={() => {
         if (type === "design") {
-          store.selectModel(id);
+          store.selectModel(modelId);
         }
       }}
     >
-       {isBaseModel && type === "design" && (
+       {store.baseModel===modelId && type === "design" && (
         <div className="absolute top-3 left-3 bg-transparent p-1">
           <GoHomeFill  size={20} />
         </div>

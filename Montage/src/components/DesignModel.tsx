@@ -30,7 +30,7 @@ function DesignModel() {
           <DesignNavBar />
         </div>
         {/* <div className="flex justify-between"> */}
-        <div className="absolute fixed left-0 top-16  z-20">
+        <div className="absolute fixed left-0 top-17  z-20">
           <DesignLeftBar />
         </div>
         <DisplayOption />
@@ -43,7 +43,7 @@ function DesignModel() {
             </div>
           )}  */}
         <div
-          className={`absolute fixed right-0 top-16 z-20 transition-all duration-300 ${
+          className={`absolute fixed right-0 top-17 z-20 transition-all duration-300 ${
             showRightBar ? "w-90" : "w-0 overflow-hidden"
           }`}
         >
