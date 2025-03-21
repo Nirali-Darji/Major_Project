@@ -37,7 +37,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
 
   const material = useMemo(
     () =>
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshStandardMaterial({
         vertexColors: true,
         transparent: true,
         
