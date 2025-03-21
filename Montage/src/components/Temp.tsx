@@ -68,9 +68,7 @@ const Temp = observer(() => {
   
         {/* Canvas Container */}
         <div className="flex-1">
-          <Canvas>
             <CanvasSetup />
-          </Canvas>
         </div>
       </div>
     );

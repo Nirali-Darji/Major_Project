@@ -5,11 +5,16 @@ import * as THREE from 'three';
 
 const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, position: [number, number, number] }) => {
   const ref = useRef<THREE.Group>(null);
+  const planeRef = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
     if (gltf && gltf.scene) {
       gltf.scene.traverse((child: any) => {
         if (child.isMesh) {
+          // Enable shadow casting for all meshes
+          child.castShadow = true;
+          child.receiveShadow = true;
+          
           if(child.name.includes("Roof")){
             child.material.transparent = true;
             child.material.opacity = 0;
@@ -22,26 +27,26 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
             child.material.color.set("cyan");
             child.material.opacity = 0.7;
           }
-         child.raycast =() =>{} 
+          
+          child.raycast = () => {} 
         }
       });
     }
-
-
-
   }, [gltf]);
 
   return (
-    <group
-      ref={ref}
-      position={position}
-      rotation-y={store.getModelRotation(id)}
-      scale={store.getModelScale(id)} 
-    >
+    <>
       
-      <primitive object={gltf.scene.clone()} />
-      
-    </group>
+      {/* 3D Model */}
+      <group
+        ref={ref}
+        position={position}
+        rotation-y={store.getModelRotation(id)}
+        scale={store.getModelScale(id)} 
+      >
+        <primitive object={gltf.scene.clone()} />
+      </group>
+    </>
   );
 });
 

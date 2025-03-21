@@ -36,7 +36,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
 
   const material = useMemo(
     () =>
-      new THREE.MeshBasicMaterial({
+      new THREE.MeshStandardMaterial({
         vertexColors: true,
         transparent: true,
         
@@ -280,12 +280,12 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       {geometry && (
   <>
     <mesh geometry={geometry} material={material}>
-      <Edges threshold={15} color={0x000000} lineWidth={1} />
+      <Edges threshold={15} color={0x000000} lineWidth={2} />
     </mesh>
     
     <lineSegments>
       <edgesGeometry args={[geometry]} />
-      <lineBasicMaterial color="#000000" linewidth={1} />
+      <lineBasicMaterial color="#000000" linewidth={0.5} />
     </lineSegments>
   </>
 )}
