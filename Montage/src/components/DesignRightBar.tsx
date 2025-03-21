@@ -51,14 +51,23 @@ const TinyHomeSelector = () => {
 
   useEffect(() => {
     const dispose = reaction(
-      () => store.models.slice(),
+      () => store.models.slice(), // Watches models array
       (models) => {
-        if (moduleData && models.length > 0) {
-          setTotals(totalUtility(moduleData, models));
-          console.log("cost :", totalCost(moduleData, models));
+        if (moduleData) {
+          if (models.length === 0) {
+            setTotals({ totalBedRooms: 0, totalBathrooms: 0, totalSize: 0 }); // Reset to zero
+          } else {
+            setTotals(totalUtility(moduleData, models));
+          }
+
+          console.log(
+            "cost :",
+            models.length > 0 ? totalCost(moduleData, models) : 0
+          );
         }
       }
     );
+
     return () => dispose();
   }, [moduleData]);
 
@@ -173,35 +182,43 @@ const totalUtility = (moduleData, models) => {
   );
 };
 
-// const totalCost = (moduleData, models) => {
-//   if (!Array.isArray(moduleData)) moduleData = [moduleData];
-
-//   const filteredDesigns = models
-//     .map((model) => moduleData.find((item) => item?.id === model.gltfId))
-//     .filter(Boolean);
-//   return filteredDesigns.reduce(
-//     (acc, design) => {
-//       acc.totalCost += design?.pricePerSqft || 0;
-//       return acc;
-//     },
-//     { totalCost: 0 }
-//   );
-// };
 const totalCost = (moduleData, models) => {
+  if (!Array.isArray(moduleData)) moduleData = [moduleData];
+
+  const filteredDesigns = models
+    .map((model) => moduleData.find((item) => item?.id === model.gltfId))
+    .filter(Boolean);
+    console.log("Filtered Design",filteredDesigns)
+  // return filteredDesigns.reduce(
+  //   (acc, design) => {
+  //     acc.totalCost += design?.pricePerSqft || 0;
+  //     return acc;
+  //   },
+  //   { totalCost: 0 }
+  // );
   let totalCost = 0;
-
-  if (!Array.isArray(moduleData)) {
-    moduleData = [moduleData];
+  for (let i = 0; i < filteredDesigns.length; i++) {
+    console.log("index",filteredDesigns[i]);
+    console.log(filteredDesigns[i].pricePerSqft);
+    totalCost += filteredDesigns[i].pricePerSqft || 0;
   }
-
-  for (let i = 0; i < models.length; i++) {
-    for (let j = 0; j < moduleData.length; j++) {
-      if (moduleData[j].id === models[i].gltfId) {
-        totalCost += moduleData[j].pricePerSqft || 0;
-        break; // Stop searching once we find a match
-      }
-    }
-  }
-
   return totalCost;
 };
+// const totalCost = (moduleData, models) => {
+//   let totalCost = 0;
+
+//   if (!Array.isArray(moduleData)) {
+//     moduleData = [moduleData];
+//   }
+
+//   for (let i = 0; i < models.length; i++) {
+//     for (let j = 0; j < moduleData.length; j++) {
+//       if (moduleData[j].id === models[i].gltfId) {
+//         totalCost += moduleData[j].pricePerSqft || 0;
+//         break;
+//       }
+//     }
+//   }
+
+//   return totalCost;
+// };
