@@ -15,7 +15,7 @@ interface models {
   url: string;
   position: [number, number, number];
   rotation: [number, number, number];
-  group: THREE.Group[];
+  group: Array<THREE.Group>;
   scale: [number, number, number];
 }
 class ConfiguratorStore {
@@ -81,41 +81,58 @@ class ConfiguratorStore {
 
   updateNodesOnScaling(modelId: string, newScale: [number, number, number]) {
     const modelNodes = this.nodes.filter(node => node.modelId === modelId);
-    console.log(modelNodes);
     const model = this.models.find(m => m.id === modelId);
     
     if (!model || modelNodes.length === 0) {
         return;
     }
 
+    // Calculate scale factors
     const scaleFactorX = newScale[0] / model.scale[0];
     const scaleFactorY = newScale[1] / model.scale[1];
     const scaleFactorZ = newScale[2] / model.scale[2];
 
+    // Early return if no scaling happened
     if (scaleFactorX === 1 && scaleFactorY === 1 && scaleFactorZ === 1) return;
 
+    // Get model rotation
+    const rotation = model.rotation || [0, 0, 0];
+    const yRotation = rotation[1];
+
+    // Create rotation matrix for the current model rotation
+    const rotationMatrix = new THREE.Matrix4().makeRotationY(yRotation);
+    // Create inverse rotation matrix to undo rotation
+    const inverseRotationMatrix = new THREE.Matrix4().makeRotationY(-yRotation);
+    
+    // Create scale matrix
     const scaleMatrix = new THREE.Matrix4().makeScale(scaleFactorX, scaleFactorY, scaleFactorZ);
 
-
     modelNodes.forEach(node => {
+        // Get node start and end positions
+        const startVec = new THREE.Vector3().fromArray(node.start);
+        const endVec = new THREE.Vector3().fromArray(node.end);
 
-        const startRelative = new THREE.Vector3().fromArray(node.start);
-        const endRelative = new THREE.Vector3().fromArray(node.end);
+        // 1. Un-rotate the points (bring them to original orientation)
+        startVec.applyMatrix4(inverseRotationMatrix);
+        endVec.applyMatrix4(inverseRotationMatrix);
 
-        startRelative.applyMatrix4(scaleMatrix);
-        endRelative.applyMatrix4(scaleMatrix);
+        // 2. Apply scaling
+        startVec.applyMatrix4(scaleMatrix);
+        endVec.applyMatrix4(scaleMatrix);
 
-        const newStart = startRelative;
-        const newEnd = endRelative;
-        const newCenter = new THREE.Vector3().addVectors(newStart, newEnd).multiplyScalar(0.5);
+        // 3. Re-apply rotation
+        startVec.applyMatrix4(rotationMatrix);
+        endVec.applyMatrix4(rotationMatrix);
 
-        node.start = [newStart.x, newStart.y, newStart.z];
-        node.end = [newEnd.x, newEnd.y, newEnd.z];
+        // Update node positions
+        node.start = [startVec.x, startVec.y, startVec.z];
+        node.end = [endVec.x, endVec.y, endVec.z];
+        
+        // Recalculate center
+        const newCenter = new THREE.Vector3().addVectors(startVec, endVec).multiplyScalar(0.5);
         node.center = [newCenter.x, newCenter.y, newCenter.z];
     });
-
 }
-
 
   setModelScale(id: string, scale: [number, number, number]) {
     const model = this.models.find((m) => m.id === id);
@@ -125,7 +142,7 @@ class ConfiguratorStore {
     }
   }
 
-  addModelToGroup(id: string, mesh: THREE.Group) {
+  addModelToGroup(id: string, mesh: THREE.Mesh) {
     const model = this.models.find((m) => m.id === id);
     if (model) {
       model.group.push(mesh);
@@ -297,9 +314,9 @@ class ConfiguratorStore {
         );
   
         if (currentCenter.distanceTo(otherCenter) < threshold && currentNode.primaryAxes === otherNode.primaryAxes) {
-          if (this.checkModelOverlap(currentModel, otherStartModel)) {
-            continue;
-          }
+          // if (this.checkModelOverlap(currentModel, otherStartModel)) {
+          //   continue;
+          // }
         
           const snapOffset = otherCenter.clone().sub(currentCenter);
           newPosition.add(snapOffset);

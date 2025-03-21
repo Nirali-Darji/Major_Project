@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/Addons.js';
 import store from '../stores/ConfiguratorStore';
 
+
 const useMergeGeometry = (gltf, id, modelCenter) => {
   const scale = store.getModelScale(id);
 
@@ -61,7 +62,7 @@ const useMergeGeometry = (gltf, id, modelCenter) => {
 
     return { geometry: mergedGeometry };
   }, [gltf, id, scale]);
-
+ 
   return { geometry };
 };
 

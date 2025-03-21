@@ -21,9 +21,9 @@ const Model = observer(
 
     useEffect(() => {
       if (gltf && gltf.scene && !store.nodes.some(node => node.modelId === id)) {
-        store.addModelToGroup(id, gltf.scene.clone());
         gltf.scene.traverse((child) => {
           if (child.isMesh) {
+            store.addModelToGroup(id, child);
             if (child.name.includes("Node")) {
               const nodeGeometry = child.geometry.clone();
               nodeGeometry.applyMatrix4(child.matrixWorld);

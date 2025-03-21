@@ -72,20 +72,51 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       modelCenter
     );
 
-  const mirrorHorizontally = () => {
-    const currentScale = store.getModelScale(id);
-    const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
-   
-  store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
-  
-  };
-
-  const mirrorVertically = () => {
-    const currentScale = store.getModelScale(id);
-    const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
-  
-    store.setModelScale(id, [currentScale[0], currentScale[1],newScaleZ]);;
-  };
+    const mirrorHorizontally = () => {
+      const currentScale = store.getModelScale(id);
+      const rotation = store.getModelRotation(id);
+      const yRotation = rotation;
+      
+      // Normalize rotation to 0-360 degrees (assuming rotation is in radians)
+      const normalizedRotation = ((yRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      
+      // Check if rotation is around 90 or 270 degrees (with some tolerance)
+      const isNear90Deg = Math.abs(normalizedRotation - Math.PI/2) < 0.1;
+      const isNear270Deg = Math.abs(normalizedRotation - 3*Math.PI/2) < 0.1;
+      
+      if (isNear90Deg || isNear270Deg) {
+        // When rotated 90/270 degrees, "horizontal" mirroring should affect Z axis
+        const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
+        store.setModelScale(id, [currentScale[0], currentScale[1], newScaleZ]);
+      } else {
+        // Normal case - horizontal mirroring affects X axis
+        const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
+        store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
+      }
+    };
+    
+    const mirrorVertically = () => {
+      const currentScale = store.getModelScale(id);
+      const rotation = store.getModelRotation(id);
+      const yRotation = rotation;
+      
+      // Normalize rotation to 0-360 degrees
+      const normalizedRotation = ((yRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      
+      // Check if rotation is around 90 or 270 degrees
+      const isNear90Deg = Math.abs(normalizedRotation - Math.PI/2) < 0.1;
+      const isNear270Deg = Math.abs(normalizedRotation - 3*Math.PI/2) < 0.1;
+      
+      if (isNear90Deg || isNear270Deg) {
+        // When rotated 90/270 degrees, "vertical" mirroring should affect X axis
+        const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
+        store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
+      } else {
+        // Normal case - vertical mirroring affects Z axis
+        const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
+        store.setModelScale(id, [currentScale[0], currentScale[1], newScaleZ]);
+      }
+    };
 
   const onPointerDown = (e) => {
     e.stopPropagation();
