@@ -368,7 +368,7 @@ checkModelOverlap(modelA: models, modelB: models): boolean {
   loadModels(models) {
     models.forEach((m) =>{
       const rotation:[number, number, number] = [0,m.rotation,0];
-      this.addModel(m.url,m.position,m.moduleId,rotation,m.scale)});
+      this.addModel(m.glbFile,m.position,m.moduleId,rotation,m.scale)});
   }
 
 }
