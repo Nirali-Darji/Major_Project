@@ -40,18 +40,18 @@ class ConfiguratorStore {
     this.viewMode = mode;
   }
 
-  addModel(url: string, position: [number, number, number], gltfId?: string) {
+  addModel(url: string, position: [number, number, number], gltfId?: string, rotation?:[number, number, number], scale?: [number, number, number]) {
     const id = Math.random().toString(36).substr(2, 9);
-    const rotation: [number, number, number] = [0, 0, 0];
-    const scale: [number, number, number] = [1, 1, 1];
+    // const rotation: [number, number, number] = [0, 0, 0];
+    // const scale: [number, number, number] = [1, 1, 1];
     this.models.push({
       id,
       url,
       position,
-      rotation,
+      rotation: rotation || [0, 0, 0],
       group: [],
       gltfId,
-      scale,
+      scale: scale ||[1, 1, 1],
     });
   }
 
@@ -365,6 +365,11 @@ checkModelOverlap(modelA: models, modelB: models): boolean {
     console.log(this.nodes)
 }
 
+  loadModels(models) {
+    models.forEach((m) =>{
+      const rotation:[number, number, number] = [0,m.rotation,0];
+      this.addModel(m.url,m.position,m.moduleId,rotation,m.scale)});
+  }
 
 }
 
