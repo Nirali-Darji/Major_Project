@@ -1,6 +1,5 @@
 import { computed, makeAutoObservable, action } from "mobx";
 import * as THREE from 'three';
-import { textureLoad } from "three/tsl";
 import loadTexture from "../utils/textureLoader";
 
 interface nodes {
@@ -54,7 +53,7 @@ setShowDetails(value:boolean){
     this.viewMode = mode;
   }
 
-  addModel(url: string, position: [number, number, number], gltfId?: string, rotation?:[number, number, number], scale?: [number, number, number]) {
+  addModel(url: string, position?: [number, number, number], gltfId?: string, rotation?:[number, number, number], scale?: [number, number, number]) {
     const id = Math.random().toString(36).substr(2, 9);
     if(this.models.length === 0){
       this.baseModel = id;
@@ -65,7 +64,7 @@ setShowDetails(value:boolean){
     this.models.push({
       id,
       url,
-      position,
+      position: position||[0, 0, 0],
       rotation: rotation || [0, 0, 0],
       group: [],
       gltfId,
@@ -429,15 +428,22 @@ checkModelOverlap(modelA: models, modelB: models): boolean {
   setNodes(modelId: string, start: [number, number, number], end: [number, number, number], center: [number, number, number], primaryAxes: string) {
     const id: string = Math.random().toString(36).substr(2, 9);
     this.nodes.push({ id, modelId, start, end, center, primaryAxes });
-    console.log(this.nodes)
+}
+
+removeModels(){
+  this.models = [];
 }
 
   loadModels(models) {
+    this.removeModels();
     models.forEach((m) =>{
       const rotation:[number, number, number] = [0,m.rotation,0];
+      if(m.glbFile === null) return;
+      if(m.position === null) {
+        m.position = [0,0,0];
+      }
       this.addModel(m.glbFile,m.position,m.moduleId,rotation,m.scale)});
   }
-
 }
 
 const store = new ConfiguratorStore();

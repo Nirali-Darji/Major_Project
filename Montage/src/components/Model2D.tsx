@@ -281,74 +281,17 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       {geometry && (
   <>
     <mesh geometry={geometry} material={material}>
-      <Edges threshold={15} color={0x000000} lineWidth={1} />
+      <Edges threshold={5} color={0xfefefe} lineWidth={1} />
     </mesh>
     
     <lineSegments>
       <edgesGeometry args={[geometry]} />
-      <lineBasicMaterial color="#000000" linewidth={1} />
+      <lineBasicMaterial color="#0f0f0f" linewidth={1} />
     </lineSegments>
   </>
 )}
       {isSelected && (
-        <Html>
-          <div
-            style={{
-              position: "absolute",
-              top: "-60px",
-              left: "-60px",
-              backgroundColor: "rgba(0,0,0,0.7)",
-              color: "white",
-              padding: "5px 10px",
-              borderRadius: "3px",
-              fontSize: "10px",
-              userSelect: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: "5px"
-            }}
-          >
-            <div>
-              {id.substring(0, 4)}
-              {isDragging ? " (dragging)" : ""}
-              {isRotating ? " (rotating)" : ""}
-            </div>
-            <div style={{ display: "flex", gap: "5px" }}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  mirrorHorizontally();
-                }}
-                style={{
-                  cursor: "pointer",
-                  border: "none",
-                  color: "white",
-                  padding: "3px 5px",
-                  borderRadius: "2px",
-                  fontSize: "10px"
-                }}
-              >
-                Mirror H
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  mirrorVertically();
-                }}
-                style={{
-                  cursor: "pointer",
-                  border: "none",
-                  color: "white",
-                  padding: "3px 5px",
-                  borderRadius: "2px",
-                  fontSize: "10px"
-                }}
-              >
-                Mirror V
-              </button>
-            </div>
-          </div>
-        </Html>
+        <DesignTools mirrorHorizontal={mirrorHorizontally} mirrorVertical={mirrorVertically}/>
       )}
       
     </group>

@@ -1,15 +1,18 @@
-import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { LuLayoutGrid } from "react-icons/lu";
 import { FaList } from "react-icons/fa6";
-import { FaCaretRight } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import generalStore from "../stores/GeneralStore";
 import { observer } from "mobx-react-lite";
+import store from "../stores/ConfiguratorStore";
 
 function Toolbar() {
   // const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const handleNewDesignClick = () =>{
+    store.removeModels();
+    navigate("/design");
+  }
   return (
     <div className="flex justify-between w-full border-b-2 border-[#DCDCDC] pb-2">
       {/* <div>
@@ -58,7 +61,7 @@ function Toolbar() {
             </div>
           )} */}
           <div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-sm shadow hover:bg-gray-800 transition" onClick={() => navigate("/design")}>
+        <button className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-sm shadow hover:bg-gray-800 transition" onClick={handleNewDesignClick}>
           <FaPlus />
           <span className="text-base font-medium">New Design</span>
         </button>

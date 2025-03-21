@@ -17,8 +17,9 @@ const Model = observer(
     url: string;
     position: [number, number, number];
   }) => {
+    
+    console.log("gltf");
     const gltf = useLoader(GLTFLoader, url);
-
     useEffect(() => {
       if (gltf && gltf.scene && !store.nodes.some(node => node.modelId === id)) {
         gltf.scene.traverse((child) => {

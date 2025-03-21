@@ -17,7 +17,7 @@ const DesignCard = ({ design, type,modelId, index }) => {
 
   return (
     <div
-      className={`relative w-full mx-2 bg-white rounded-2xl shadow-lg overflow-hidden group hover:border-2 ${
+      className={`relative w-full h-max mx-2 bg-white rounded-2xl shadow-lg overflow-hidden group hover:border-2 ${
         type === "design" && store.isSelected(modelId)
           ? "border-yellow-500 border-2"
           : "border-black"
@@ -37,7 +37,6 @@ const DesignCard = ({ design, type,modelId, index }) => {
         className="absolute top-3 right-3 text-gray-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
         onClick={() => {
           setShowDropdown((prev) => !prev);
-          console.log("clicked", showDropdown);
         }}
       >
         <BsThreeDotsVertical size={20} />
@@ -46,7 +45,7 @@ const DesignCard = ({ design, type,modelId, index }) => {
       {showDropdown && <DropdownMenu onClose={() => setShowDropdown(false)} />}</div>
 
       {/* Card Image */}
-      <div className="w-[80%] m-auto p-4 flex justify-center items-center">
+      <div className="w-[80%] m-auto p-4 flex justify-center items-center ">
         {!isImageLoaded && (
           <div className="absolute inset-0 flex justify-center items-center">
             <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>

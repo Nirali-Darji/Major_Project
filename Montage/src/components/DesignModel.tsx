@@ -30,18 +30,13 @@ function DesignModel() {
           <DesignNavBar />
         </div>
         {/* <div className="flex justify-between"> */}
-        <div className="absolute fixed left-0 top-17  z-20">
+        <div className="absolute fixed left-0 top-17 bottom-0 z-20">
           <DesignLeftBar />
         </div>
         <DisplayOption />
         <div className="flex-grow">
           <div className="p-4"></div>
         </div>
-        {/* {showRightBar &&  (
-            <div className="absolute fixed right-0 top-16 z-20">
-              <DesignRightBar />
-            </div>
-          )}  */}
         <div
           className={`absolute fixed right-0 top-17 z-20 transition-all duration-300 ${
             showRightBar ? "w-90" : "w-0 overflow-hidden"

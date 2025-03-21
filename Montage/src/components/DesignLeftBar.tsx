@@ -101,7 +101,6 @@ const DesignContent = observer(({ handleClick }) => {
   const [isListView, setIsListView] = useState(false);
   const models = store.models;
   const dataArray = Array.isArray(data) ? data : [data];
-  console.log(dataArray);
   // const filteredDesigns = models
   //   .map((model) => dataArray?.find((item) => item?.id === model.gltfId))
   //   .filter(Boolean);
@@ -113,7 +112,7 @@ const DesignContent = observer(({ handleClick }) => {
     .filter(Boolean);
 
   return (
-    <div className="flex flex-col gap-2 h-full">
+    <div className="flex flex-col gap-2 ">
       {/* Header with View Toggle */}
       <div className="flex justify-between border-b-1 border-[#DCDCDC] px-2 py-2">
         <h3 className="text-lg font-semibold">Design</h3>
@@ -141,7 +140,7 @@ const DesignContent = observer(({ handleClick }) => {
       </div>
 
       {/* List or Grid Rendering */}
-      <div className="flex flex-wrap gap-4 h-full overflow-y-auto">
+      <div className="flex flex-wrap gap-4 h-[calc(95vh-100px)] overflow-y-auto">
         {isListView
           ? filteredDesigns.map((design, index) => (
               <ListViewCard key={index} design={design} modelId={design.modelId} index={index + 1} />
@@ -187,7 +186,6 @@ function ModulesContent() {
   const { data, loading, error } = ApiFetcher({
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
-  console.log("GlbFile :", data?.glbFile);
 
   const [selectedType, setSelectedType] = useState<string | null>("Annex");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -198,9 +196,6 @@ function ModulesContent() {
     .filter((module) =>
       module.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  console.log(loading);
-  console.log(error);
-  console.log("Data : ", data);
   if (loading)
     return (
       <div className="flex justify-center items-center h-full">
@@ -208,11 +203,9 @@ function ModulesContent() {
       </div>
     );
   if (error) return <div>Error: {error}</div>;
-  if (data) {
-    console.log("GlbFile :", data[0]?.glbFile);
-  }
+  
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 h-[calc(100vh-100px)]">
       <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC] mx-2">
         Modules
       </h3>

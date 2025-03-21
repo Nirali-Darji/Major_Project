@@ -4,6 +4,7 @@ import store from "../stores/ConfiguratorStore";
 import { BsThreeDots } from "react-icons/bs";
 import generalStore from "../stores/GeneralStore";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 
 function PortfolioContent() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -14,7 +15,6 @@ function PortfolioContent() {
     endpoint: `${import.meta.env.VITE_API_BASE_URL}/modules`,
   });
 
-  console.log("Portfolios :", data);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error loading data</p>;
@@ -33,7 +33,6 @@ function PortfolioContent() {
         })),
       }
     : null;
-    console.log(updatedPortfolio);
 
   return (
     <div>
@@ -77,14 +76,20 @@ function PortfolioContent() {
 function PortfolioCard({ design }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(design.monogramImage);
-  console.log('ModuleArr',design.moduleArr)
+  const navigate= useNavigate();
+  console.log(design.moduleArr[0]?.glbFile)
+
+  const handleLoadDesign = () => {
+    store.loadModels(design.moduleArr);
+    navigate("/design");
+  }
   return (
     <div className="w-80 bg-white shadow-lg rounded-2xl p-4 flex flex-col gap-3 border border-gray-200 relative">
       <div
         className="w-60 h-60 overflow-hidden rounded-xl"
         onMouseEnter={() => setImageSrc(design.designImage)}
         onMouseLeave={() => setImageSrc(design.monogramImage)}
-        // onClick={() => store.setDesign(design.moduleArr)}
+        onClick={handleLoadDesign}
       >
         <img
           src={imageSrc}

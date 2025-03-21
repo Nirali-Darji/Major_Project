@@ -7,7 +7,7 @@ const CameraSetUp = observer(() => {
     const { viewport } = useThree()
     const aspect = viewport.width / viewport.height
     
-    const orthoZoom = 10
+    const orthoZoom = 6
     const orthoNear = 0.1
     const orthoFar = 1000
   

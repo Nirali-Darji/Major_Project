@@ -8,7 +8,6 @@ const Model3D = observer(({ id, gltf, position }: { id: string, gltf: any, posit
 
   useEffect(() => {
     if (gltf && gltf.scene) {
-      console.log(gltf)
       gltf.scene.traverse((child: any) => {
           if(child.name.includes("Roof") || child.name.includes("Ceiling")){
             child.visible = false;

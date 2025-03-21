@@ -60,7 +60,7 @@ function DesignTools({ mirrorHorizontal, mirrorVertical }) {
         {showDropdown && (
 
 <div  className="absolute top-0 left-full ml-4 z-[9999] w-55 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
-          <DropdownMenu onClose={() => setShowDropdown(false)} className ="absolute top-0 left-full" /></div>
+          <DropdownMenu onClose={() => setShowDropdown(false)}  /></div>
         )}
       </div>
     </Html>
@@ -74,7 +74,7 @@ export function DropdownMenu({ onClose }) {
   // const [showDetails, setShowDetails] = useState(false);
   const id = store.selectedModelId;
   const modelDetails = getModelDetails(id);
-  const positions = store.getModelPosition(id);
+  const positions = store.geModelPosition(id);
   console.log(positions);
 
   return (
