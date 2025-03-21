@@ -14,8 +14,8 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   const isSelected = store.isSelected(id);
   const isDragging = store.isBeingDragged(id);
   const position = store.geModelPosition(id);
-  const scale = store.getModelScale(id);
   const rotation = store.getModelRotation(id);
+  const scale = store.getModelScale(id);
   const [isHovered, setIsHovered] = useState(false);
   const { camera, raycaster, mouse, gl } = useThree();
   const [boundingBoxInfo, setBoundingBoxInfo] = useState(null);
@@ -24,7 +24,6 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   );
   
 
-  // Create the drag plane for pointer interactions
   const dragPlane = useMemo(() => {
     const plane = new THREE.Plane();
     plane.setFromNormalAndCoplanarPoint(
@@ -46,7 +45,11 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     []
   );
 
-  const mergedGeometry = useMergeGeometry(gltf, id);
+  const { geometry } = useMergeGeometry(gltf, id, modelCenter);
+  
+
+
+
   const { startDragging } = useDragInteractions(
     id,
     gl,
@@ -70,24 +73,51 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       modelCenter
     );
 
-  const mirrorHorizontally = () => {
-    const currentScale = store.getModelScale(id);
-    const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
-    const flipMatrix = new THREE.Matrix4().makeScale(-1, 1, 1);
-  
-  mergedGeometry?.applyMatrix4(flipMatrix);
-  
-  store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
-  
-  mergedGeometry?.computeVertexNormals();
-  };
-
-  const mirrorVertically = () => {
-    const currentScale = store.getModelScale(id);
-    const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
-  
-    store.setModelScale(id, [currentScale[0], currentScale[1],newScaleZ]);;
-  };
+    const mirrorHorizontally = () => {
+      const currentScale = store.getModelScale(id);
+      const rotation = store.getModelRotation(id);
+      const yRotation = rotation;
+      
+      // Normalize rotation to 0-360 degrees (assuming rotation is in radians)
+      const normalizedRotation = ((yRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      
+      // Check if rotation is around 90 or 270 degrees (with some tolerance)
+      const isNear90Deg = Math.abs(normalizedRotation - Math.PI/2) < 0.1;
+      const isNear270Deg = Math.abs(normalizedRotation - 3*Math.PI/2) < 0.1;
+      
+      if (isNear90Deg || isNear270Deg) {
+        // When rotated 90/270 degrees, "horizontal" mirroring should affect Z axis
+        const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
+        store.setModelScale(id, [currentScale[0], currentScale[1], newScaleZ]);
+      } else {
+        // Normal case - horizontal mirroring affects X axis
+        const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
+        store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
+      }
+    };
+    
+    const mirrorVertically = () => {
+      const currentScale = store.getModelScale(id);
+      const rotation = store.getModelRotation(id);
+      const yRotation = rotation;
+      
+      // Normalize rotation to 0-360 degrees
+      const normalizedRotation = ((yRotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      
+      // Check if rotation is around 90 or 270 degrees
+      const isNear90Deg = Math.abs(normalizedRotation - Math.PI/2) < 0.1;
+      const isNear270Deg = Math.abs(normalizedRotation - 3*Math.PI/2) < 0.1;
+      
+      if (isNear90Deg || isNear270Deg) {
+        // When rotated 90/270 degrees, "vertical" mirroring should affect X axis
+        const newScaleX = currentScale[0] > 0 ? -Math.abs(currentScale[0]) : Math.abs(currentScale[0]);
+        store.setModelScale(id, [newScaleX, currentScale[1], currentScale[2]]);
+      } else {
+        // Normal case - vertical mirroring affects Z axis
+        const newScaleZ = currentScale[2] > 0 ? -Math.abs(currentScale[2]) : Math.abs(currentScale[2]);
+        store.setModelScale(id, [currentScale[0], currentScale[1], newScaleZ]);
+      }
+    };
 
   const onPointerDown = (e) => {
     e.stopPropagation();
@@ -142,7 +172,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
   useEffect(() => {
     cleanupBoundingBox();
 
-    if (!groupRef.current || !mergedGeometry) {
+    if (!groupRef.current || !geometry) {
       setBoundingBoxInfo(null);
       return;
     }
@@ -153,11 +183,11 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     }
 
     const geomBoundingBox =
-      mergedGeometry.boundingBox ||
-      (mergedGeometry.computeBoundingBox(), mergedGeometry.boundingBox);
+      geometry.boundingBox ||
+      (geometry.computeBoundingBox(), geometry.boundingBox);
 
-    const min = geomBoundingBox.min.clone();
-    const max = geomBoundingBox.max.clone();
+    const min = geomBoundingBox.min;
+    const max = geomBoundingBox.max;
 
     const yPos = 4; // Use consistent height
 
@@ -225,7 +255,7 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
     return () => {
       cleanupBoundingBox();
     };
-  }, [store.selectedModelId, isSelected, isHovered, mergedGeometry]);
+  }, [store.selectedModelId, isSelected, isHovered, geometry]);
 
   
   useEffect(() =>{
@@ -234,10 +264,12 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
  
 
   return (
+    <>
     <group
       ref={groupRef}
       position={position}
-      rotation-y={rotation} // Use this format for Three.js rotation in React Three Fiber
+      rotation-y={rotation} 
+      scale={scale}
       onClick={(e) => {
         e.stopPropagation();
         store.selectModel(id);
@@ -245,14 +277,95 @@ const Model2D = observer(({ id, gltf }: { id: string; gltf: any }) => {
       onPointerDown={onPointerDown}
       onPointerOver={() => setIsHovered(true)}
       onPointerOut={() => setIsHovered(false)}
-      scale={scale}
     >
-      {mergedGeometry && <mesh geometry={mergedGeometry} material={material}>
-        <Edges threshold={15} color={0x000000} lineWidth={1} />
-      </mesh>}
+      {geometry && (
+  <>
+    <mesh geometry={geometry} material={material}>
+      <Edges threshold={15} color={0x000000} lineWidth={1} />
+    </mesh>
+    
+    <lineSegments>
+      <edgesGeometry args={[geometry]} />
+      <lineBasicMaterial color="#000000" linewidth={1} />
+    </lineSegments>
+  </>
+)}
+      {isSelected && (
+        <Html>
+          <div
+            style={{
+              position: "absolute",
+              top: "-60px",
+              left: "-60px",
+              backgroundColor: "rgba(0,0,0,0.7)",
+              color: "white",
+              padding: "5px 10px",
+              borderRadius: "3px",
+              fontSize: "10px",
+              userSelect: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px"
+            }}
+          >
+            <div>
+              {id.substring(0, 4)}
+              {isDragging ? " (dragging)" : ""}
+              {isRotating ? " (rotating)" : ""}
+            </div>
+            <div style={{ display: "flex", gap: "5px" }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  mirrorHorizontally();
+                }}
+                style={{
+                  cursor: "pointer",
+                  border: "none",
+                  color: "white",
+                  padding: "3px 5px",
+                  borderRadius: "2px",
+                  fontSize: "10px"
+                }}
+              >
+                Mirror H
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  mirrorVertically();
+                }}
+                style={{
+                  cursor: "pointer",
+                  border: "none",
+                  color: "white",
+                  padding: "3px 5px",
+                  borderRadius: "2px",
+                  fontSize: "10px"
+                }}
+              >
+                Mirror V
+              </button>
+            </div>
+          </div>
+        </Html>
+      )}
       
-      {isSelected && <DesignTools/>}
     </group>
+    {
+      store.nodes?.map((endpoint) => (
+       endpoint.modelId === id &&
+        <>
+        <mesh
+          position={[endpoint?.center[0] +  modelCenter.x,4,endpoint?.center[2] + modelCenter.z]}
+        >
+          <sphereGeometry args={[0.1]} />
+          <meshBasicMaterial color="red" />
+        </mesh>
+      </>
+      ))
+    }
+    </>
   );
 });
 
