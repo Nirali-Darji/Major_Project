@@ -25,7 +25,7 @@ const TinyHomeSelector = () => {
     totalBathrooms: 0,
     totalSize: 0,
   });
-  const [cost,setCost] = useState(0);
+  const [cost, setCost] = useState(0);
   useEffect(() => {
     if (data?.subStyleList?.length > 0) {
       const initialSelection = {};
@@ -54,29 +54,29 @@ const TinyHomeSelector = () => {
   useEffect(() => {
     if (moduleData && store.models.length > 0) {
       setTotals(totalUtility(moduleData, store.models));
-      setCost(totalCost(moduleData, store.models)); 
+      setCost(totalCost(moduleData, store.models));
     }
-  }, [moduleData, store.models]); 
+  }, [moduleData, store.models]);
 
   useEffect(() => {
     const dispose = reaction(
-      () => store.models.slice(), // Watches models array
+      () => store.models.slice(),
       (models) => {
         if (moduleData) {
           if (models.length === 0) {
             setTotals({ totalBedRooms: 0, totalBathrooms: 0, totalSize: 0 });
-            setCost(0); // Reset cost when no models exist
+            setCost(0);
           } else {
             setTotals(totalUtility(moduleData, models));
-            setCost(totalCost(moduleData, models)); // Update cost state
+            setCost(totalCost(moduleData, models));
           }
         }
       }
     );
-  
+
     return () => dispose();
   }, [moduleData]);
-  
+
   if (loading || moduleLoading)
     return (
       <div className="flex justify-center items-center min-h-screen bg-white">
@@ -96,31 +96,29 @@ const TinyHomeSelector = () => {
     store.updateTexture(substyleName, material.imageURL);
   };
 
-
-  const handleOrderNow = async() => {
-    if(generalStore.designId ===""){
+  const handleOrderNow = async () => {
+    if (generalStore.designId === "") {
       alert("Please save your design first!");
-    }
-    else{
+    } else {
       const response = await postRequest({
         url: `${import.meta.env.VITE_API_BASE_URL}/stripe-checkout`,
         body: {
-          "designId":`${generalStore.designId}`,
-          "packageId":"5e489a12-0067-4cf8-be1e-58cd8594e942",
-          "packageAddonsIds":["9c515ced-cee4-4ad6-8723-1a747ad367c1"],
-          "additionalOptIds":[1],
-          "address":{
-              "firstName":"John",
-              "lastName":"Doe",
-              "phone":"123456789",
-              "email":"pruthav@hexacoder.com"
-          }
-      },
+          designId: `${generalStore.designId}`,
+          packageId: "5e489a12-0067-4cf8-be1e-58cd8594e942",
+          packageAddonsIds: ["9c515ced-cee4-4ad6-8723-1a747ad367c1"],
+          additionalOptIds: [1],
+          address: {
+            firstName: "John",
+            lastName: "Doe",
+            phone: "123456789",
+            email: "pruthav@hexacoder.com",
+          },
+        },
       });
       console.log(response);
       window.open(response.clientSecret, "_self");
     }
-  }
+  };
 
   return (
     <div className="p-6 w-90 mx-auto bg-white shadow-md space-y-4 h-[calc(105vh-100px)] overflow-y-auto z-10">
@@ -187,7 +185,10 @@ const TinyHomeSelector = () => {
           {/* Example cost calculation */}
           <p className="text-xs text-gray-500">Estimated Construction Cost</p>
         </div>
-        <button className="bg-black text-sm text-white px-2 py-2 rounded" onClick={handleOrderNow}>
+        <button
+          className="bg-black text-sm text-white px-2 py-2 rounded"
+          onClick={handleOrderNow}
+        >
           Order Now
         </button>
       </div>
@@ -221,10 +222,10 @@ const totalCost = (moduleData, models) => {
   const filteredDesigns = models
     .map((model) => moduleData.find((item) => item?.id === model.gltfId))
     .filter(Boolean);
-    console.log("Filtered Design",filteredDesigns)
+  console.log("Filtered Design", filteredDesigns);
   let totalCost = 0;
   for (let i = 0; i < filteredDesigns.length; i++) {
-    console.log("index",filteredDesigns[i]);
+    console.log("index", filteredDesigns[i]);
     console.log(filteredDesigns[i].pricePerSqft);
     totalCost += filteredDesigns[i].pricePerSqft || 0;
   }
