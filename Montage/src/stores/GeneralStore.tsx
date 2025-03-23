@@ -2,13 +2,21 @@ import { makeAutoObservable } from "mobx";
 
 class GeneralStore {
   selectedPortfolio: string = "";
-  currentDesignName: string = "untitled";
+  currentDesignName: string = "";
   configuredStyle: Array<{ subStyleId: number; selectedMaterialId: number }> = []; 
+  isSaved:boolean = false;
+  designId:string = "";
 
   constructor() {
     makeAutoObservable(this);
   }
 
+  setDesignId(id: string) {
+    this.designId = id;
+  }
+  getDesignId() {
+    return this.designId; 
+  }
   setSelectedPortfolio(portfolio: string) {
     this.selectedPortfolio = portfolio;
   }
@@ -29,6 +37,9 @@ class GeneralStore {
 
   setConfiguredStyles(styles: Array<{ subStyleId: number; selectedMaterialId: number }>) {
     this.configuredStyle = styles;
+  }
+  setIsSaved(savedValue: boolean) {
+    this.isSaved = savedValue;
   }
 }
 

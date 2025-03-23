@@ -380,9 +380,9 @@ setShowDetails(value:boolean){
         );
   
         if (currentCenter.distanceTo(otherCenter) < threshold && currentNode.primaryAxes === otherNode.primaryAxes) {
-          // if (this.checkModelOverlap(currentModel, otherStartModel)) {
-          //   continue;
-          // }
+          if (this.checkModelOverlap(currentModel, otherStartModel)) {
+            continue;
+          }
         
           const snapOffset = otherCenter.clone().sub(currentCenter);
           newPosition.add(snapOffset);
@@ -399,14 +399,30 @@ setShowDetails(value:boolean){
 
   getModelBoundingBox(model: models): THREE.Box3 {
     const bbox = new THREE.Box3();
+    const tempBox = new THREE.Box3();
+    const tempMatrix = new THREE.Matrix4();
+  
     for (const mesh of model.group) {
-        mesh.updateMatrixWorld(true);
-        const meshBBox = new THREE.Box3().setFromObject(mesh);
-        meshBBox.translate(new THREE.Vector3(...model.position));
-        bbox.union(meshBBox);
+      mesh.updateMatrixWorld(true);
+      
+      // Get mesh bounding box
+      tempBox.setFromObject(mesh);
+  
+      // Apply model's world matrix (including position, rotation, scale)
+      tempMatrix.compose(
+        new THREE.Vector3(...model.position),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(...model.rotation)),
+        new THREE.Vector3(...model.scale)
+      );
+  
+      tempBox.applyMatrix4(tempMatrix);
+  
+      // Merge into overall bounding box
+      bbox.union(tempBox);
     }
+  
     return bbox;
-}
+  }
 
   
 checkModelOverlap(modelA: models, modelB: models): boolean {
