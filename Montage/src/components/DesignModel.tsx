@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Canvas } from "@react-three/fiber";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import DesignLeftBar from "./DesignLeftBar";
 import DesignRightBar from "./DesignRightBar";
@@ -17,11 +16,10 @@ function DesignModel() {
   return (
     <div className="h-screen w-screen">
       <div className="flex-1 fixed top-0 left-0 w-full h-full z-0">
-        <Canvas>
+        
           <CanvasSetup />
-        <ScreenshotButton />
+        {/* <ScreenshotButton /> */}
 
-        </Canvas>
       </div>
 
       <div className="relative z-10 ">
