@@ -31,7 +31,7 @@ export default function Login() {
             <button
               type="submit"
               className="w-full bg-[#011627] text-white py-2 rounded-lg hover:bg-gray-800"
-              
+              onClick={() => navigate("/portfolio")}
             >                                                                           
               Sign In
             </button>

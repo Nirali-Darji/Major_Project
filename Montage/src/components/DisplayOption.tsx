@@ -18,10 +18,14 @@ const DisplayOption = observer(() => {
         {buttons.map((btn) => (
           <button
             key={btn.id}
-            onClick={() => store.setViewMode(btn.id)}
+            onClick={() => {
+              if (btn.id !== "images") {
+                store.setViewMode(btn.id);
+              }
+            }}
             className={`p-1 rounded-lg transition-all duration-200 hover:bg-gray-300 ${
               store.viewMode === btn.id
-                ? "border-2 border-blue-500" 
+                ? "border-2 border-blue-500"
                 : "border-2 border-transparent"
             }`}
           >
