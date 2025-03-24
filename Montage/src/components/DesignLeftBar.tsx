@@ -205,7 +205,7 @@ function ModulesContent() {
   if (error) return <div>Error: {error}</div>;
   
   return (
-    <div className="flex flex-col gap-2 h-[calc(100vh-100px)]">
+    <div className="flex flex-col gap-2">
       <h3 className="text-lg font-semibold border-b-1 border-[#DCDCDC] mx-2">
         Modules
       </h3>
@@ -236,7 +236,7 @@ function ModulesContent() {
         ))}
       </div>
       <div
-        className="flex flex-wrap gap-4 h-full overflow-y-auto"
+        className="flex flex-wrap gap-4 w-full overflow-y-auto max-h-[calc(85vh-100px)] overflow-x-hidden"
       >
         {filteredModules && filteredModules.length > 0 ? (
           filteredModules.map((module) => (
