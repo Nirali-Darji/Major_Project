@@ -18,7 +18,6 @@ const Model = observer(
     position: [number, number, number];
   }) => {
     
-    console.log("gltf");
     const gltf = useLoader(GLTFLoader, url);
     useEffect(() => {
       if (gltf && gltf.scene && !store.nodes.some(node => node.modelId === id)) {
@@ -28,59 +27,74 @@ const Model = observer(
             if (child.name.includes("Node")) {
               const nodeGeometry = child.geometry.clone();
               nodeGeometry.applyMatrix4(child.matrixWorld);
-    
+            
               const nodeBox = new THREE.Box3().setFromBufferAttribute(
                 nodeGeometry.attributes.position
               );
               const nodeSize = new THREE.Vector3();
               nodeBox.getSize(nodeSize);
-              const primaryAxis = nodeSize.x > nodeSize.z ? "x" : "z";
-    
+              let primaryAxis = nodeSize.x > nodeSize.z ? "x" : "z"; 
+            
               const nodeCenter = new THREE.Vector3();
               nodeBox.getCenter(nodeCenter);
               const model = store.models.find((m) => m.id === id);
               if (!model) return;
-              
+            
               const modelBox = store.getModelBoundingBox(model);
               const modelSize = new THREE.Vector3();
               modelBox.getSize(modelSize);
-    
+            
               const perpendicularAxis = primaryAxis === "x" ? "z" : "x";
               const boundaryCenter = new THREE.Vector3().copy(nodeCenter);
+            
               if (perpendicularAxis === "x") {
-                boundaryCenter.x = nodeCenter.x > 0 
-                  ? modelSize.x / 2 
-                  : -modelSize.x / 2;
+                boundaryCenter.x = nodeCenter.x > 0 ? modelSize.x / 2 : -modelSize.x / 2;
               } else {
-                boundaryCenter.z = nodeCenter.z > 0 
-                  ? modelSize.z / 2 
-                  : -modelSize.z / 2;
+                boundaryCenter.z = nodeCenter.z > 0 ? modelSize.z / 2 : -modelSize.z / 2;
               }
-    
-              const directionVector =
-                primaryAxis === "x"
-                  ? new THREE.Vector3(1, 0, 0)
-                  : new THREE.Vector3(0, 0, 1);
-              const halfLength =
-                primaryAxis === "x" ? nodeSize.x / 2 : nodeSize.z / 2;
-    
+            
+              let directionVector = new THREE.Vector3(
+                primaryAxis === "x" ? 1 : 0,
+                0,
+                primaryAxis === "z" ? 1 : 0
+              );
+              const halfLength = primaryAxis === "x" ? nodeSize.x / 2 : nodeSize.z / 2;
+            
               const startPoint = new THREE.Vector3();
               const endPoint = new THREE.Vector3();
-              startPoint
-                .copy(boundaryCenter)
-                .sub(directionVector.clone().multiplyScalar(halfLength));
-              endPoint
-                .copy(boundaryCenter)
-                .add(directionVector.clone().multiplyScalar(halfLength));
-    
+              startPoint.copy(boundaryCenter).sub(directionVector.clone().multiplyScalar(halfLength));
+              endPoint.copy(boundaryCenter).add(directionVector.clone().multiplyScalar(halfLength));
+            
+              startPoint.multiply(new THREE.Vector3(model.scale[0], model.scale[1], model.scale[2]));
+              endPoint.multiply(new THREE.Vector3(model.scale[0], model.scale[1], model.scale[2]));
+              boundaryCenter.multiply(new THREE.Vector3(model.scale[0], model.scale[1], model.scale[2]));
+
+              const rotationMatrix = new THREE.Matrix4().makeRotationFromQuaternion(
+                new THREE.Quaternion().setFromEuler(
+                  new THREE.Euler(...model.rotation)
+                )
+              );
+            
+              startPoint.applyMatrix4(rotationMatrix);
+              endPoint.applyMatrix4(rotationMatrix);
+              boundaryCenter.applyMatrix4(rotationMatrix);
+              directionVector.applyMatrix4(rotationMatrix);
+            
+              if (Math.abs(directionVector.x) > Math.abs(directionVector.z)) {
+                primaryAxis = "x";
+              } else {
+                primaryAxis = "z";
+              }
+            
               store.setNodes(
                 id,
                 [startPoint.x, 0, startPoint.z],
                 [endPoint.x, 0, endPoint.z],
-                [boundaryCenter.x, 0, boundaryCenter.z], 
+                [boundaryCenter.x, 0, boundaryCenter.z],
                 primaryAxis
               );
             }
+            
           }
         });
       }

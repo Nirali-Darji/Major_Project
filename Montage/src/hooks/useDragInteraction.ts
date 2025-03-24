@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import store from "../stores/ConfiguratorStore";
 import getInterSection from "../utils/getInterSection";
+import * as THREE from 'three';
 
-const useDragInteractions = (id, gl, raycaster, camera, mouse, dragPlane, intersection) => {
+
+const useDragInteractions = (id:string, gl: THREE.WebGLRenderer, raycaster: THREE.Raycaster, camera: THREE.Camera, mouse: THREE.Vector2, dragPlane: THREE.Plane, intersection: THREE.Vector3) => {
     const onPointerMove = (e) => {
       if (!store.isDragging) return;
       

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import * as THREE from 'three';
 
 
-const useBoundingBox = (groupRef, mergedGeometry, isSelected, isHovered, position, setModelCenter) => {
+const useBoundingBox = (groupRef, mergedGeometry, isSelected:boolean, isHovered:boolean,position :[number, number, number], setModelCenter) => {
     const [boundingBoxInfo, setBoundingBoxInfo] = useState(null);
   
     const cleanupBoundingBox = () => {
@@ -37,7 +37,7 @@ const useBoundingBox = (groupRef, mergedGeometry, isSelected, isHovered, positio
         return;
       }
   
-      const boundingBox = new THREE.Box3().setFromObject(groupRef.current);
+      const boundingBox: THREE.Box3 = new THREE.Box3().setFromObject(groupRef.current);
       
       const min = boundingBox.min.clone();
       const max = boundingBox.max.clone();
@@ -54,7 +54,6 @@ const useBoundingBox = (groupRef, mergedGeometry, isSelected, isHovered, positio
         new THREE.Vector3(min.x, yPos, max.z), // top-left
       ];
       
-      // Calculate and store model center (important for rotation)
       const center = new THREE.Vector3(
         (min.x + max.x) / 2,
         yPos,
@@ -66,7 +65,6 @@ const useBoundingBox = (groupRef, mergedGeometry, isSelected, isHovered, positio
       const lineMaterial = new THREE.LineBasicMaterial({ color: circleColor, linewidth: 5 });
       const lines = [];
       
-      // Create 4 lines for the rectangle
       for (let i = 0; i < 4; i++) {
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
           corners[i],
@@ -78,8 +76,7 @@ const useBoundingBox = (groupRef, mergedGeometry, isSelected, isHovered, positio
         lines.push(line);
       }
       
-      // Only add corner circles if the model is selected (not on hover or by default)
-      const circles = [];
+      const circles:THREE.Mesh[] = [];
       if (isSelected) {
         const circleMaterial = new THREE.MeshBasicMaterial({ 
           color: circleColor,
