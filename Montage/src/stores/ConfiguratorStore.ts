@@ -26,7 +26,6 @@ class ConfiguratorStore {
   nodes: Array<nodes> = [];
   baseModel:string=""
   showDetails:boolean = false;
-  // Dragging state
   isDragging: boolean = false;
   dragStartPosition: [number, number, number] | null = null;
   dragOffset: [number, number, number] = [0, 0, 0];
@@ -58,9 +57,7 @@ setShowDetails(value:boolean){
     if(this.models.length === 0){
       this.baseModel = id;
     }
-
-    // const rotation: [number, number, number] = [0, 0, 0];
-    // const scale: [number, number, number] = [1, 1, 1];
+    
     this.models.push({
       id,
       url,
@@ -69,7 +66,8 @@ setShowDetails(value:boolean){
       group: [],
       gltfId,
       scale: scale ||[1, 1, 1],
-    });
+    });   
+
   }
 
   getModelRotation(id: string) {
@@ -99,53 +97,38 @@ setShowDetails(value:boolean){
   updateNodesOnScaling(modelId: string, newScale: [number, number, number]) {
     const modelNodes = this.nodes.filter(node => node.modelId === modelId);
     const model = this.models.find(m => m.id === modelId);
-    
     if (!model || modelNodes.length === 0) {
         return;
     }
-
-    // Calculate scale factors
     const scaleFactorX = newScale[0] / model.scale[0];
     const scaleFactorY = newScale[1] / model.scale[1];
     const scaleFactorZ = newScale[2] / model.scale[2];
 
-    // Early return if no scaling happened
     if (scaleFactorX === 1 && scaleFactorY === 1 && scaleFactorZ === 1) return;
 
-    // Get model rotation
     const rotation = model.rotation || [0, 0, 0];
     const yRotation = rotation[1];
 
-    // Create rotation matrix for the current model rotation
     const rotationMatrix = new THREE.Matrix4().makeRotationY(yRotation);
-    // Create inverse rotation matrix to undo rotation
     const inverseRotationMatrix = new THREE.Matrix4().makeRotationY(-yRotation);
     
-    // Create scale matrix
     const scaleMatrix = new THREE.Matrix4().makeScale(scaleFactorX, scaleFactorY, scaleFactorZ);
 
     modelNodes.forEach(node => {
-        // Get node start and end positions
         const startVec = new THREE.Vector3().fromArray(node.start);
         const endVec = new THREE.Vector3().fromArray(node.end);
 
-        // 1. Un-rotate the points (bring them to original orientation)
         startVec.applyMatrix4(inverseRotationMatrix);
         endVec.applyMatrix4(inverseRotationMatrix);
 
-        // 2. Apply scaling
         startVec.applyMatrix4(scaleMatrix);
         endVec.applyMatrix4(scaleMatrix);
 
-        // 3. Re-apply rotation
         startVec.applyMatrix4(rotationMatrix);
         endVec.applyMatrix4(rotationMatrix);
 
-        // Update node positions
         node.start = [startVec.x, startVec.y, startVec.z];
         node.end = [endVec.x, endVec.y, endVec.z];
-        
-        // Recalculate center
         const newCenter = new THREE.Vector3().addVectors(startVec, endVec).multiplyScalar(0.5);
         node.center = [newCenter.x, newCenter.y, newCenter.z];
     });
@@ -167,8 +150,6 @@ setShowDetails(value:boolean){
   }
 
  async updateTexture(type: string, url: string) {
-    // const model = this.models.find((m) => m.id === id);
-    // const model = this.models.find((m) => m.id === this.selectedModelId);
     if (!url) {
       console.error("Invalid texture URL:", url);
       return;
@@ -191,7 +172,7 @@ setShowDetails(value:boolean){
       
     }
     catch(error){
-      console.log(error)
+      // console.log(error)
     }
     
   }
@@ -386,7 +367,6 @@ setShowDetails(value:boolean){
         
           const snapOffset = otherCenter.clone().sub(currentCenter);
           newPosition.add(snapOffset);
-          console.log("object snapped");
           snapped = true;
           break;
         }
@@ -405,10 +385,8 @@ setShowDetails(value:boolean){
     for (const mesh of model.group) {
       mesh.updateMatrixWorld(true);
       
-      // Get mesh bounding box
       tempBox.setFromObject(mesh);
   
-      // Apply model's world matrix (including position, rotation, scale)
       tempMatrix.compose(
         new THREE.Vector3(...model.position),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(...model.rotation)),
@@ -417,7 +395,6 @@ setShowDetails(value:boolean){
   
       tempBox.applyMatrix4(tempMatrix);
   
-      // Merge into overall bounding box
       bbox.union(tempBox);
     }
   
@@ -444,6 +421,7 @@ checkModelOverlap(modelA: models, modelB: models): boolean {
   setNodes(modelId: string, start: [number, number, number], end: [number, number, number], center: [number, number, number], primaryAxes: string) {
     const id: string = Math.random().toString(36).substr(2, 9);
     this.nodes.push({ id, modelId, start, end, center, primaryAxes });
+
 }
 
 removeModels(){
@@ -458,7 +436,8 @@ removeModels(){
       if(m.position === null) {
         m.position = [0,0,0];
       }
-      this.addModel(m.glbFile,m.position,m.moduleId,rotation,m.scale)});
+      this.addModel(m.glbFile,m.position,m.moduleId,rotation,m.scale);    
+    });
   }
 }
 

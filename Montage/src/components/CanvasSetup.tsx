@@ -81,7 +81,7 @@ const CanvasSetup = observer(() => {
         position={[0, -2.01, 0]} 
         receiveShadow
         >
-        <planeGeometry args={[100, 100]} />
+        <planeGeometry args={[1000, 1000]} />
         <meshStandardMaterial 
           color="#ffffff" 
           roughness={0.8}
