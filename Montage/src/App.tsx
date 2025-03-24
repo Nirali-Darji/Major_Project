@@ -12,8 +12,8 @@ const App = observer(() => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Portfolio />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         {/* <Route path="/" element={<Portfolio />} /> */}
         <Route path="/design" element={<DesignModel />} />

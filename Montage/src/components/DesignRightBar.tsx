@@ -113,10 +113,15 @@ const TinyHomeSelector = () => {
             phone: "123456789",
             email: "pruthav@hexacoder.com",
           },
+          success: `http://localhost:5173/login`,
+          cancel: `http://localhost:5173/design`,
         },
       });
       console.log(response);
-      window.open(response.clientSecret, "_self");
+      // window.open(response.clientSecret, "_self");
+      if (response.clientSecret) {
+        window.location.href = response.clientSecret;
+      }
     }
   };
 

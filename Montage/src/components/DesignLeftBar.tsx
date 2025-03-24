@@ -140,7 +140,7 @@ const DesignContent = observer(({ handleClick }) => {
       </div>
 
       {/* List or Grid Rendering */}
-      <div className="flex flex-wrap gap-4 h-[calc(95vh-100px)] overflow-y-auto">
+      <div className="flex flex-wrap gap-4 w-full overflow-y-auto max-h-[calc(95vh-100px)] overflow-x-hidden">
         {isListView
           ? filteredDesigns.map((design, index) => (
               <ListViewCard key={index} design={design} modelId={design.modelId} index={index + 1} />

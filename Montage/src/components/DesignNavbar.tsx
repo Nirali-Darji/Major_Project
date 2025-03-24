@@ -2,7 +2,6 @@ import { CgProfile } from "react-icons/cg";
 import { useNavigate } from "react-router-dom";
 import generalStore from "../stores/GeneralStore";
 import { observer } from "mobx-react-lite";
-import ApiFetcher from "../utils/ApiFetcher";
 import saveDesign from "../utils/saveDesign";
 
 
@@ -20,7 +19,7 @@ function DesignNavbar() {
     <div className="flex justify-between w-full items-center bg-gray-100 border-b-2 border-[#DCDCDC] p-3 z-10">
       <div className="flex items-center gap-10">
         <h2 className="text-2xl">Montage</h2>
-        <button className="text-2xl" onClick={() => navigate("/")}>
+        <button className="text-2xl" onClick={() => navigate("/portfolio")}>
           {portfolioName}
         </button>
         <input

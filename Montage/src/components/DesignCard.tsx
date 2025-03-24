@@ -39,7 +39,8 @@ const DesignCard = ({ design, type,modelId, index }) => {
           setShowDropdown((prev) => !prev);
         }}
       >
-        <BsThreeDotsVertical size={20} />
+        {type === "design" && <BsThreeDotsVertical size={20} />}
+        
       </div>
       <div className="absolute top-3 right-3 bg-white  z-999">
       {showDropdown && <DropdownMenu onClose={() => setShowDropdown(false)} />}</div>
