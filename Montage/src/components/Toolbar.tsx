@@ -9,13 +9,14 @@ import store from "../stores/ConfiguratorStore";
 function Toolbar() {
   // const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-  const portfolioName = localStorage.getItem('portfolioName');
+  // const portfolioName = localStorage.getItem('portfolioName');
   const handleNewDesignClick = () =>{
     store.removeModels();
     store.setViewMode("2D");
     generalStore.setDesignId("");
     navigate("/design");
   }
+
   return (
     <div className="flex justify-between w-full border-b-2 border-[#DCDCDC] pb-2">
       {/* <div>
@@ -25,7 +26,7 @@ function Toolbar() {
         </button>
       </div> */}
       <div>
-        <h2 className="text-xl font-semibold" >{portfolioName}</h2>
+        <h2 className="text-xl font-semibold" >{generalStore.selectedPortfolio}</h2>
       </div>
       <div className="flex gap-2 items-center">
         <div className="flex">

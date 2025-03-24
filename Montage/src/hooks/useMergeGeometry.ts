@@ -14,9 +14,9 @@ const useMergeGeometry = (gltf, id, modelCenter) => {
     gltf.scene.updateMatrixWorld(true);
 
     gltf.scene.traverse((child) => {
+      if (child.name.includes("Roof") || child.name.includes("Ceiling")) return;
         if (child.isMesh) {
           store.addModelToGroup(id, child);
-          if (child.name.includes("Roof")) return;
 
           const geometryForMerge = child.geometry.clone();
           geometryForMerge.applyMatrix4(child.matrixWorld); 
